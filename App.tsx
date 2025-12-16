@@ -10,7 +10,8 @@ import { renderClip, checkClipStatus, testBackendConnection, createProject, getP
 // Tipe untuk Navigasi Sidebar
 type ViewType = 'editor' | 'library' | 'settings';
 
-const DEFAULT_BACKEND_URL = 'https://nonimitating-corie-extemporary.ngrok-free.dev';
+// Default to local development backend
+const DEFAULT_BACKEND_URL = 'http://127.0.0.1:3333';
 
 export default function App() {
   // Navigation State
@@ -169,8 +170,11 @@ export default function App() {
                     setImportStatus('');
                     setIsImporting(false);
                     
-                    // Switch to backend stream
-                    const streamUrl = `${backendUrl.replace(/\/$/, '')}/v2/projects/${projectId}/stream`;
+                    // Construct stream URL for the downloaded file
+                    // Format: BASE_URL/storage/downloads/project_{ID}_full.mp4
+                    const cleanBaseUrl = backendUrl.replace(/\/$/, '');
+                    const streamUrl = `${cleanBaseUrl}/storage/downloads/project_${projectId}_full.mp4`;
+                    
                     console.log("Video ready! Switching to stream:", streamUrl);
                     
                     setVideoState(prev => ({
@@ -187,6 +191,13 @@ export default function App() {
                      const progress = statusRes.data.progress || 0;
                      const status = statusRes.data.status;
                      setImportStatus(`Status: ${status} (${progress}%)`);
+                     
+                     if (status === 'failed') {
+                         clearInterval(pollInterval);
+                         setImportStatus('Download Failed');
+                         alert("Video download failed on the server. Please check backend logs.");
+                         setIsImporting(false);
+                     }
                 }
             } catch (e) {
                 console.warn("Polling error:", e);
@@ -430,7 +441,33 @@ export default function App() {
         setAnalysisProgress(`Scanning frame ${i + 1} of ${captureTimes.length} (${Math.floor(time)}s)...`);
 
         video.currentTime = time;
-        await new Promise(r => setTimeout(r, 600)); 
+
+        // Reliable seeking mechanism for streaming video
+        const seekPromise = new Promise<void>((resolve) => {
+            const handler = () => {
+                video.removeEventListener('seeked', handler);
+                resolve();
+            };
+            // Check if we are already close enough (unlikely but safe)
+            if (Math.abs(video.currentTime - time) < 0.5) {
+                resolve();
+            } else {
+                video.addEventListener('seeked', handler);
+            }
+        });
+        
+        // Trigger seek
+        video.currentTime = time;
+        
+        // Wait for seek to complete (with timeout safety)
+        await Promise.race([
+            seekPromise,
+            new Promise(r => setTimeout(r, 2000)) // 2s timeout fallback
+        ]);
+        
+        // Small buffer to ensure frame is actually rendered on canvas
+        await new Promise(r => setTimeout(r, 400)); 
+
         const blob = await captureFrame();
         if (blob) {
           frames.push({ timestamp: time, blob });

@@ -158,6 +158,7 @@ export const createProject = async (baseUrl: string, youtubeUrl: string, title: 
   try {
     const cleanUrl = baseUrl.replace(/\/$/, '');
     // Using a hardcoded userId for MVP
+    // Requesting 'yt-dlp' downloader explicitly for reliability
     const response = await fetch(`${cleanUrl}/v2/projects`, {
       method: 'POST',
       headers: getHeaders(),
@@ -165,7 +166,8 @@ export const createProject = async (baseUrl: string, youtubeUrl: string, title: 
         title,
         youtubeUrl,
         userId: 1, 
-        quality: '720p'
+        quality: '720p',
+        downloader: 'yt-dlp' 
       })
     });
     return await handleResponse(response);
