@@ -1,0 +1,5 @@
+{
+  "name": "ClipGenius AI",
+  "description": "An AI-powered video repurposing tool inspired by OpusClip. It allows users to upload videos, analyze frames for viral potential using Gemini, and preview vertical crops for TikTok/Reels.",
+  "requestFramePermissions": []
+}
