@@ -31,7 +31,8 @@ export interface VideoState {
   duration: number;
   currentTime: number;
   isPlaying: boolean;
-  sourceType: 'local' | 'youtube';
+  sourceType: 'local' | 'youtube' | 'backend-stream';
+  projectId?: number;
 }
 
 export enum AspectRatio {

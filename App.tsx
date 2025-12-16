@@ -5,7 +5,7 @@ import { AnalysisSidebar } from './components/AnalysisSidebar';
 import { VideoState, AIAnalysisResult, AspectRatio, ViralClip } from './types';
 import { analyzeFrame, analyzeVideoSegments } from './services/gemini';
 import { VideoFrameProcessor } from './services/gpuProcessor';
-import { renderClip, checkClipStatus, testBackendConnection, getVideoInfo } from './services/backend';
+import { renderClip, checkClipStatus, testBackendConnection, createProject, getProjectDownloadStatus, batchProcessClips } from './services/backend';
 
 // Tipe untuk Navigasi Sidebar
 type ViewType = 'editor' | 'library' | 'settings';
@@ -121,56 +121,85 @@ export default function App() {
     if (!youtubeLink.trim()) return;
 
     setIsImporting(true);
-    setImportStatus('Getting video info...');
+    setImportStatus('Initializing project...');
     
     try {
-        // 1. Validate video using backend Info endpoint
-        const infoResponse = await getVideoInfo(backendUrl, youtubeLink);
-        console.log("Video Metadata:", infoResponse.data);
-        const metadata = infoResponse.data;
+        // V2 Workflow: Create Project & Download
+        const title = "New Project " + new Date().toLocaleTimeString();
+        const createRes = await createProject(backendUrl, youtubeLink, title);
+        
+        if (!createRes.success) {
+            throw new Error(createRes.message);
+        }
 
-        // 2. Skip video streaming - use thumbnail mode
-        setImportStatus('Video loaded in thumbnail mode');
+        const { projectId, videoInfo, estimatedTime } = createRes.data;
+        console.log("Project Created:", createRes.data);
+
+        // Show thumbnail immediately while downloading
+        const durationVal = typeof videoInfo.duration === 'string' ? parseInt(videoInfo.duration) : videoInfo.duration;
         
         // Revoke previous URL if any
         if (videoState.url) URL.revokeObjectURL(videoState.url);
 
-        const durationVal = typeof metadata.duration === 'string' ? parseInt(metadata.duration) : metadata.duration;
-
-        // 3. Set video state WITHOUT blob URL (thumbnail mode)
         setVideoState({
             file: null,
-            url: null, // No video URL - will show thumbnail
-            thumbnail: metadata.thumbnail,
+            url: null,
+            thumbnail: videoInfo.thumbnail,
             duration: durationVal,
             currentTime: 0,
             isPlaying: false,
-            sourceType: 'youtube'
+            sourceType: 'youtube', // Temporary while downloading
+            projectId: projectId
         });
         
-        // 4. Store YouTube URL for clip rendering
         setYoutubeLink(youtubeLink);
-        
         setAnalysis(null);
         setViralClips([]);
         setActiveView('editor');
 
-        // 5. Show success message
-        alert(`✅ Video loaded successfully!\n\nTitle: ${metadata.title}\nDuration: ${Math.floor(durationVal / 60)}:${(durationVal % 60).toString().padStart(2, '0')}\n\n📝 Note: Video preview disabled due to YouTube restrictions.\nYou can still create and export clips!`);
+        setImportStatus(`Downloading: 0% (Est. ${estimatedTime})`);
+
+        // Start polling for download status
+        const pollInterval = setInterval(async () => {
+            try {
+                const statusRes = await getProjectDownloadStatus(backendUrl, projectId);
+                
+                if (statusRes.success && statusRes.data.readyForEditing) {
+                    clearInterval(pollInterval);
+                    setImportStatus('');
+                    setIsImporting(false);
+                    
+                    // Switch to backend stream
+                    const streamUrl = `${backendUrl.replace(/\/$/, '')}/v2/projects/${projectId}/stream`;
+                    console.log("Video ready! Switching to stream:", streamUrl);
+                    
+                    setVideoState(prev => ({
+                        ...prev,
+                        sourceType: 'backend-stream',
+                        url: streamUrl,
+                        isPlaying: true
+                    }));
+                    
+                    alert("✅ Video downloaded successfully! You can now use AI Analysis features.");
+                    
+                } else if (statusRes.success) {
+                     // Update progress
+                     const progress = statusRes.data.progress || 0;
+                     const status = statusRes.data.status;
+                     setImportStatus(`Status: ${status} (${progress}%)`);
+                }
+            } catch (e) {
+                console.warn("Polling error:", e);
+                // Continue polling despite temporary errors
+            }
+        }, 3000); // Check every 3 seconds
 
     } catch (error) {
         console.error("Import failed:", error);
         const errMessage = (error as Error).message;
-        
-        if (errMessage.includes('Ngrok')) {
-           alert("Ngrok Connection Warning:\n\nPlease go to 'Settings' > 'Backend Connection' and click 'Test'.\nIf using Ngrok free tier, you may need to open the backend URL in a browser and click 'Visit Site' first.");
-        } else {
-           alert(`Failed to load video info: ${errMessage}\n\nPlease check your Backend URL in Settings.`);
-           setActiveView('settings');
-        }
-    } finally {
+        setImportStatus('Import failed');
+        alert(`Failed to import video: ${errMessage}\nPlease check your backend connection.`);
         setIsImporting(false);
-        setImportStatus('');
     }
   };
 
@@ -210,17 +239,41 @@ export default function App() {
 
   // Handler untuk Export/Render Clip with Polling
   const handleExportClip = async (clip: ViralClip) => {
-    if (videoState.sourceType !== 'youtube' || !youtubeLink) {
-      alert("MVP Limitation: Export is currently only supported for YouTube videos.");
+    // Both youtube (demo) and backend-stream (real) modes use the render endpoint
+    if (!youtubeLink) {
+      alert("No video source found.");
+      return;
+    }
+    
+    const parseTime = (t: string) => {
+      const [m, s] = t.split(':').map(Number);
+      return m * 60 + s;
+    };
+
+    // V2 Workflow: If we have a project ID (downloaded video), use batch processor for real output
+    if (videoState.projectId) {
+      try {
+          const processRes = await batchProcessClips(backendUrl, videoState.projectId, [{
+              title: clip.title || "Exported Clip",
+              startTime: parseTime(clip.start),
+              endTime: parseTime(clip.end),
+              aspectRatio: aspectRatio
+          }]);
+          
+          if (processRes.success) {
+             alert(`✅ Clip processing started on server!\n\nStatus: ${processRes.data.estimatedTime}\n\nSince this is a background process, the clip will be saved to your Project Library on the server once complete.`);
+          } else {
+             throw new Error(processRes.message);
+          }
+      } catch(e) {
+          console.error("Batch Process Failed", e);
+          alert("Failed to start processing: " + (e as Error).message);
+      }
       return;
     }
 
+    // V1 Workflow: Demo/Direct Render
     try {
-      const parseTime = (t: string) => {
-        const [m, s] = t.split(':').map(Number);
-        return m * 60 + s;
-      };
-
       const payload = {
         videoUrl: youtubeLink,
         startTime: parseTime(clip.start),
@@ -306,6 +359,12 @@ export default function App() {
   };
 
   const runFrameAnalysis = async () => {
+    // Only block if sourceType is strictly youtube (Thumbnail mode)
+    if (videoState.sourceType === 'youtube') {
+       alert("⚠️ AI Analysis Unavailable\n\nVideo is still downloading or in demo mode. Please wait for the download to complete to use AI features.");
+       return;
+    }
+
     if (!videoState.url) {
         alert("Video stream is not available for analysis.");
         return;
@@ -319,14 +378,11 @@ export default function App() {
       const frameBlob = await captureFrame();
       
       if (!frameBlob) {
-         if (videoState.sourceType === 'youtube') {
-             throw new Error("Cannot capture frame. Ensure your Backend VPS sets 'Access-Control-Allow-Origin: *' headers.");
-         }
-         throw new Error("Could not capture frame.");
+         throw new Error("Could not capture frame. If using a downloaded video, ensure CORS headers are set on backend.");
       }
 
       setAnalysisProgress('Analyzing visual content with Gemini AI...');
-      const baseContext = videoState.sourceType === 'youtube' ? "A viral YouTube video" : (videoState.file?.name || "Unknown video");
+      const baseContext = videoState.sourceType === 'backend-stream' ? "A viral YouTube video (Downloaded)" : (videoState.file?.name || "Unknown video");
       const contextText = `${baseContext}. The user is creating a video with a target aspect ratio of ${aspectRatio}. Analyze if the visual composition works well for this format (e.g. is the subject centered?).`;
       
       const result = await analyzeFrame(frameBlob, contextText);
@@ -341,6 +397,11 @@ export default function App() {
   };
 
   const scanVideo = async () => {
+    if (videoState.sourceType === 'youtube') {
+       alert("⚠️ Auto-Detect Unavailable\n\nVideo is still downloading or in demo mode. Please wait for the download to complete to use AI features.");
+       return;
+    }
+
     if (!videoState.url || !videoRef.current) {
         alert("Video stream is not available for scanning.");
         return;
@@ -377,14 +438,11 @@ export default function App() {
       }
 
       if (frames.length === 0) {
-         if (videoState.sourceType === 'youtube') {
-             throw new Error("Cannot capture frames (CORS). Check your backend configuration.");
-         }
         throw new Error("No frames could be captured.");
       }
 
       setAnalysisProgress('Sending frames to Gemini for viral analysis...');
-      const baseContext = videoState.sourceType === 'youtube' ? "A viral YouTube video" : (videoState.file?.name || "Unknown video");
+      const baseContext = videoState.sourceType === 'backend-stream' ? "A viral YouTube video (Downloaded)" : (videoState.file?.name || "Unknown video");
       const contextText = `${baseContext}. The user is creating content with a target aspect ratio of ${aspectRatio}. Identify clips where the main action remains visible and effective in this format.`;
       
       const clips = await analyzeVideoSegments(frames, contextText);
@@ -670,6 +728,7 @@ export default function App() {
                     onTimeUpdate={handleTimeUpdate}
                     onDurationChange={handleDurationChange}
                     aspectRatio={aspectRatio}
+                    downloadStatus={isImporting ? importStatus : undefined}
                   />
                 </div>
 
@@ -719,6 +778,7 @@ export default function App() {
                 onExportClip={handleExportClip}
                 currentTime={videoState.currentTime}
                 duration={videoState.duration}
+                isYouTube={videoState.sourceType === 'youtube'}
               />
 
             </div>

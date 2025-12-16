@@ -13,6 +13,7 @@ interface AnalysisSidebarProps {
   onExportClip: (clip: ViralClip) => void;
   currentTime: number;
   duration: number;
+  isYouTube: boolean;
 }
 
 export const AnalysisSidebar: React.FC<AnalysisSidebarProps> = ({ 
@@ -26,7 +27,8 @@ export const AnalysisSidebar: React.FC<AnalysisSidebarProps> = ({
   onPlayClip,
   onExportClip,
   currentTime,
-  duration
+  duration,
+  isYouTube
 }) => {
   const [activeTab, setActiveTab] = useState<'clips' | 'frame' | 'custom'>('clips');
   const [exportingId, setExportingId] = useState<string | null>(null);
@@ -122,7 +124,40 @@ export const AnalysisSidebar: React.FC<AnalysisSidebarProps> = ({
           </div>
         ) : activeTab === 'clips' ? (
           <div className="p-4 space-y-4">
-            {viralClips.length === 0 ? (
+            {isYouTube ? (
+              <div className="text-center py-10 px-6 animate-fade-in">
+                <div className="mb-4 text-yellow-500 bg-yellow-500/10 w-16 h-16 rounded-full flex items-center justify-center mx-auto border border-yellow-500/20">
+                  <i className="fa-brands fa-youtube text-3xl"></i>
+                </div>
+                <h3 className="text-slate-200 font-bold mb-2">YouTube Mode Active</h3>
+                <p className="text-xs text-slate-400 mb-6 leading-relaxed">
+                  Direct AI scanning is not available for streamed YouTube videos due to browser restrictions.
+                </p>
+                <div className="bg-slate-800 p-4 rounded-lg border border-slate-700 text-left">
+                  <p className="text-[10px] text-slate-300 mb-3 font-bold uppercase tracking-wider">How to create clips:</p>
+                  <ul className="text-xs text-slate-400 space-y-3">
+                    <li className="flex gap-3 items-start">
+                      <i className="fa-solid fa-hand-pointer text-purple-400 mt-0.5"></i>
+                      <span>Switch to the <b>Manual</b> tab above.</span>
+                    </li>
+                    <li className="flex gap-3 items-start">
+                      <i className="fa-solid fa-clock text-purple-400 mt-0.5"></i>
+                      <span>Input Start & End times.</span>
+                    </li>
+                    <li className="flex gap-3 items-start">
+                      <i className="fa-solid fa-download text-purple-400 mt-0.5"></i>
+                      <span>Click <b>Export Clip</b> to download.</span>
+                    </li>
+                  </ul>
+                </div>
+                <button
+                  onClick={() => setActiveTab('custom')}
+                  className="mt-6 w-full py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg text-xs font-medium transition-colors"
+                >
+                  Go to Manual Selection
+                </button>
+              </div>
+            ) : viralClips.length === 0 ? (
               <div className="text-center py-10">
                 <div className="mb-4 text-slate-600">
                   <i className="fa-solid fa-scissors text-4xl"></i>
@@ -267,8 +302,17 @@ export const AnalysisSidebar: React.FC<AnalysisSidebarProps> = ({
           </div>
         ) : (
           <div className="p-6">
-             {/* Existing Single Frame Analysis UI */}
-             {!analysis ? (
+             {isYouTube ? (
+                <div className="flex flex-col items-center justify-center py-10 text-center">
+                   <div className="w-16 h-16 bg-slate-800 rounded-full flex items-center justify-center mb-4 text-slate-600">
+                      <i className="fa-solid fa-ban text-2xl"></i>
+                   </div>
+                   <p className="text-slate-400 text-sm font-medium">Frame Analysis Unavailable</p>
+                   <p className="text-xs text-slate-500 mt-2 max-w-[200px]">
+                      Single frame analysis is only available for uploaded files.
+                   </p>
+                </div>
+             ) : !analysis ? (
               <div className="text-center py-8">
                 <button
                   onClick={onAnalyzeFrame}

@@ -41,6 +41,46 @@ export interface VideoInfoResponse {
   data: VideoInfo;
 }
 
+export interface CreateProjectResponse {
+  success: boolean;
+  message: string;
+  data: {
+    projectId: number;
+    title: string;
+    status: string;
+    videoInfo: VideoInfo;
+    estimatedTime: string;
+  }
+}
+
+export interface DownloadStatusResponse {
+  success: boolean;
+  data: {
+    projectId: number;
+    status: string;
+    downloaded: boolean;
+    progress: number;
+    readyForEditing: boolean;
+  }
+}
+
+export interface BatchProcessResponse {
+    success: boolean;
+    message: string;
+    data: {
+        projectId: string;
+        clipsCount: number;
+        estimatedTime: string;
+    }
+}
+
+export interface ClipRequest {
+    title: string;
+    startTime: number;
+    endTime: number;
+    aspectRatio: string;
+}
+
 export interface ConnectionTestResult {
   success: boolean;
   message: string;
@@ -113,41 +153,56 @@ export const getVideoInfo = async (baseUrl: string, videoUrl: string): Promise<V
   }
 };
 
-// Fetch video as a blob to bypass Ngrok/Browser restrictions on <video> src
-export const fetchVideoStream = async (baseUrl: string, videoUrl: string): Promise<Blob> => {
-  const cleanUrl = baseUrl.replace(/\/$/, '');
-  
-  // Helper to fetch with headers
-  const tryFetch = async (endpoint: string) => {
-    const streamUrl = `${cleanUrl}${endpoint}?url=${encodeURIComponent(videoUrl)}`;
-    const response = await fetch(streamUrl, {
-      method: 'GET',
-      headers: {
-        'ngrok-skip-browser-warning': 'true'
-      }
-    });
-    
-    if (!response.ok) {
-       // If it's a redirect that fetch followed (200 OK) it returns ok. 
-       // If it failed (404/500), throw.
-       throw new Error(`Stream Error (${response.status}) from ${endpoint}`);
-    }
-    return response.blob();
-  };
-
+// V2: Create Project (Downloads video)
+export const createProject = async (baseUrl: string, youtubeUrl: string, title: string = 'New Project'): Promise<CreateProjectResponse> => {
   try {
-    // Try primary endpoint
-    return await tryFetch('/stream');
-  } catch (primaryError) {
-    console.warn("Primary /stream endpoint failed, attempting fallback to /stream-test...", primaryError);
-    
-    try {
-      // Try fallback endpoint (recently added by backend agent)
-      return await tryFetch('/stream-test');
-    } catch (fallbackError) {
-      console.error("All stream attempts failed.");
-      throw fallbackError; // Re-throw the last error
-    }
+    const cleanUrl = baseUrl.replace(/\/$/, '');
+    // Using a hardcoded userId for MVP
+    const response = await fetch(`${cleanUrl}/v2/projects`, {
+      method: 'POST',
+      headers: getHeaders(),
+      body: JSON.stringify({
+        title,
+        youtubeUrl,
+        userId: 1, 
+        quality: '720p'
+      })
+    });
+    return await handleResponse(response);
+  } catch (error) {
+    console.error("Create Project Error:", error);
+    throw error;
+  }
+};
+
+// V2: Check Download Status
+export const getProjectDownloadStatus = async (baseUrl: string, projectId: number): Promise<DownloadStatusResponse> => {
+  try {
+    const cleanUrl = baseUrl.replace(/\/$/, '');
+    const response = await fetch(`${cleanUrl}/v2/projects/${projectId}/download-status`, {
+      method: 'GET',
+      headers: getHeaders()
+    });
+    return await handleResponse(response);
+  } catch (error) {
+    console.error("Get Download Status Error:", error);
+    throw error;
+  }
+};
+
+// V2: Batch Process Clips
+export const batchProcessClips = async (baseUrl: string, projectId: number, clips: ClipRequest[]): Promise<BatchProcessResponse> => {
+  try {
+    const cleanUrl = baseUrl.replace(/\/$/, '');
+    const response = await fetch(`${cleanUrl}/v2/projects/${projectId}/batch-clips`, {
+      method: 'POST',
+      headers: getHeaders(),
+      body: JSON.stringify({ clips })
+    });
+    return await handleResponse(response);
+  } catch (error) {
+    console.error("Batch Process Error:", error);
+    throw error;
   }
 };
 

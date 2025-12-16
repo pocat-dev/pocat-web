@@ -11,6 +11,7 @@ interface VideoPlayerProps {
   videoRef: React.RefObject<HTMLVideoElement>;
   currentTime: number;
   duration: number;
+  downloadStatus?: string; // New prop for showing download state
 }
 
 export const VideoPlayer: React.FC<VideoPlayerProps> = ({ 
@@ -22,7 +23,8 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
   aspectRatio,
   videoRef,
   currentTime,
-  duration
+  duration,
+  downloadStatus
 }) => {
   const [containerDimensions, setContainerDimensions] = useState({ width: 0, height: 0 });
   const containerRef = useRef<HTMLDivElement>(null);
@@ -78,18 +80,39 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
               <img src={thumbnail} className="w-full h-full object-contain opacity-50" alt="Video Thumbnail" />
               <div className="absolute inset-0 flex flex-col items-center justify-center">
                  <div className="bg-slate-900/90 p-6 rounded-xl border border-slate-700 backdrop-blur text-center max-w-sm shadow-2xl">
-                    <div className="w-16 h-16 bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-4 border border-slate-700">
-                        <i className="fa-solid fa-eye-slash text-3xl text-slate-400"></i>
-                    </div>
-                    <h3 className="text-white font-bold text-lg mb-2">Video Preview Unavailable</h3>
-                    <p className="text-sm text-slate-400 leading-relaxed">
-                       Due to YouTube restrictions, video playback is disabled. 
-                       <br/>
-                       <span className="text-purple-400 font-medium">You can still create and export clips!</span>
-                    </p>
-                    <div className="mt-4 text-xs bg-slate-800 p-2 rounded text-slate-500 border border-slate-700/50">
-                       <i className="fa-solid fa-info-circle mr-1"></i> Use the timeline below to scrub
-                    </div>
+                    {downloadStatus ? (
+                        <>
+                          <div className="w-16 h-16 relative mb-4 mx-auto">
+                              <div className="absolute inset-0 rounded-full border-4 border-slate-700"></div>
+                              <div className="absolute inset-0 rounded-full border-4 border-purple-500 border-t-transparent animate-spin"></div>
+                              <div className="absolute inset-0 flex items-center justify-center">
+                                <i className="fa-solid fa-cloud-arrow-down text-purple-400"></i>
+                              </div>
+                          </div>
+                          <h3 className="text-white font-bold text-lg mb-2">Downloading Video...</h3>
+                          <p className="text-sm text-slate-400 leading-relaxed mb-4">
+                             {downloadStatus}
+                          </p>
+                          <div className="w-full bg-slate-800 rounded-full h-2 overflow-hidden">
+                             <div className="bg-purple-500 h-full rounded-full animate-pulse w-full"></div>
+                          </div>
+                        </>
+                    ) : (
+                        <>
+                            <div className="w-16 h-16 bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-4 border border-slate-700">
+                                <i className="fa-solid fa-eye-slash text-3xl text-slate-400"></i>
+                            </div>
+                            <h3 className="text-white font-bold text-lg mb-2">Video Preview Unavailable</h3>
+                            <p className="text-sm text-slate-400 leading-relaxed">
+                            Due to YouTube restrictions, video playback is disabled. 
+                            <br/>
+                            <span className="text-purple-400 font-medium">You can still create and export clips!</span>
+                            </p>
+                            <div className="mt-4 text-xs bg-slate-800 p-2 rounded text-slate-500 border border-slate-700/50">
+                            <i className="fa-solid fa-info-circle mr-1"></i> Use the timeline below to scrub
+                            </div>
+                        </>
+                    )}
                  </div>
               </div>
            </div>
