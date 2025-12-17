@@ -12,6 +12,7 @@ interface VideoPlayerProps {
   currentTime: number;
   duration: number;
   downloadStatus?: string;
+  loadingTitle?: string;
   onManualExport?: () => void;
   onQuickExport?: (start: number, end: number) => Promise<void>;
 }
@@ -27,6 +28,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
   currentTime,
   duration,
   downloadStatus,
+  loadingTitle,
   onManualExport,
   onQuickExport
 }) => {
@@ -98,7 +100,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
                                 <i className="fa-solid fa-cloud-arrow-down text-3xl text-purple-400"></i>
                               </div>
                           </div>
-                          <h3 className="text-white font-bold text-xl mb-3">Downloading & Processing</h3>
+                          <h3 className="text-white font-bold text-xl mb-3">{loadingTitle || "Downloading & Processing"}</h3>
                           <p className="text-sm text-slate-400 leading-relaxed mb-6 px-4">
                              {downloadStatus}
                           </p>

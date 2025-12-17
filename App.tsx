@@ -50,6 +50,7 @@ export default function App() {
   const [downloaderMethod, setDownloaderMethod] = useState('auto');
   const [isImporting, setIsImporting] = useState(false);
   const [importStatus, setImportStatus] = useState('');
+  const [loadingTitle, setLoadingTitle] = useState('Downloading & Processing');
 
   // Project Library State
   const [projects, setProjects] = useState([
@@ -115,19 +116,44 @@ export default function App() {
       // Revoke previous URL if exists
       if (videoState.url) URL.revokeObjectURL(videoState.url);
       
-      const url = URL.createObjectURL(file);
-      setVideoState({
-        file,
-        url,
-        thumbnail: null,
-        duration: 0,
-        currentTime: 0,
-        isPlaying: false,
-        sourceType: 'local'
-      });
       setAnalysis(null);
       setViralClips([]);
       setActiveView('editor'); 
+      
+      // Start "Upload" simulation
+      setIsImporting(true);
+      setLoadingTitle("Preparing Video");
+      setImportStatus('Reading file metadata...');
+      
+      // Simulate loading progress for better UX
+      let progress = 0;
+      const interval = setInterval(() => {
+         progress += 15;
+         if (progress > 100) progress = 100;
+         
+         setImportStatus(`Loading: ${progress}%`);
+         
+         if (progress === 100) {
+             clearInterval(interval);
+             setTimeout(() => {
+                const url = URL.createObjectURL(file);
+                setVideoState({
+                  file,
+                  url,
+                  thumbnail: null,
+                  duration: 0,
+                  currentTime: 0,
+                  isPlaying: false,
+                  sourceType: 'local'
+                });
+                setIsImporting(false);
+                setImportStatus('');
+             }, 400); // Short delay at 100%
+         }
+      }, 100);
+
+      // Reset input value to allow re-uploading the same file
+      e.target.value = '';
     }
   };
 
@@ -135,6 +161,7 @@ export default function App() {
     if (!youtubeLink.trim()) return;
 
     setIsImporting(true);
+    setLoadingTitle("Downloading & Processing");
     setImportStatus(`Initializing ${downloadQuality} project...`);
     
     try {
@@ -900,6 +927,7 @@ export default function App() {
                     onDurationChange={handleDurationChange}
                     aspectRatio={aspectRatio}
                     downloadStatus={isImporting ? importStatus : undefined}
+                    loadingTitle={loadingTitle}
                     onManualExport={() => setAnalysisTab('custom')}
                     onQuickExport={handleQuickExport}
                   />
