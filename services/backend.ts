@@ -1,164 +1,88 @@
-export interface RenderRequestPayload {
-  videoUrl: string;
-  startTime: number;
-  endTime: number;
-  aspectRatio: string;
-}
 
-export interface RenderResponseData {
-  clipId: string;
-  downloadUrl: string;
-  status: 'processing' | 'completed' | 'failed';
-  estimatedTime?: string;
-}
-
-export interface RenderResponse {
+export interface BackendResponse<T = any> {
   success: boolean;
   message: string;
-  data: RenderResponseData;
-}
-
-export interface StatusResponse {
-  success: boolean;
-  status: 'processing' | 'completed' | 'failed';
-  downloadUrl?: string;
-  message?: string;
-  fileSize?: number;
-  createdAt?: string;
+  data: T;
 }
 
 export interface VideoInfo {
-  title: string;
-  duration: string | number;
+  duration: number | string;
   thumbnail: string;
-  description: string;
-  author: string;
-  viewCount: string | number;
+  title?: string;
 }
 
-export interface VideoInfoResponse {
-  success: boolean;
-  data: VideoInfo;
-}
-
-export interface CreateProjectResponse {
-  success: boolean;
-  message: string;
+export interface CreateProjectResponse extends BackendResponse {
   data: {
     projectId: number;
-    title: string;
-    status: string;
     videoInfo: VideoInfo;
     estimatedTime: string;
   }
 }
 
-export interface DownloadStatusResponse {
-  success: boolean;
+export interface ProjectStatusResponse extends BackendResponse {
   data: {
-    projectId: number;
-    status: string;
-    downloaded: boolean;
-    progress: number;
     readyForEditing: boolean;
+    downloaded?: boolean;
+    progress?: number;
+    status?: string;
   }
 }
 
-export interface BatchProcessResponse {
-    success: boolean;
-    message: string;
-    data: {
-        projectId: string;
-        clipsCount: number;
-        estimatedTime: string;
-    }
+export interface ClipProcessingResponse extends BackendResponse {
+  data: {
+    estimatedTime: string;
+  }
 }
 
-export interface ClipRequest {
-    title: string;
-    startTime: number;
-    endTime: number;
-    aspectRatio: string;
+export interface RenderClipResponse extends BackendResponse {
+  data: {
+    clipId: string;
+  }
 }
 
-export interface ConnectionTestResult {
-  success: boolean;
-  message: string;
-  details?: any;
+export interface ClipStatusData {
+  status: 'pending' | 'processing' | 'completed' | 'failed';
+  downloadUrl?: string;
+  error?: string;
 }
 
-// Helper headers to bypass Ngrok warning and ensure JSON
-const getHeaders = () => ({
-  'Content-Type': 'application/json',
-  'ngrok-skip-browser-warning': 'true',
-  'Accept': 'application/json'
-});
+export interface ClipStatusResponse extends BackendResponse {
+  data: ClipStatusData;
+}
 
-// Helper to safely handle response parsing
+const getHeaders = () => {
+  return {
+    'Content-Type': 'application/json',
+    'Accept': 'application/json'
+  };
+};
+
 const handleResponse = async (response: Response) => {
-  const text = await response.text();
-  try {
-    // Try to parse JSON
-    const data = JSON.parse(text);
-    
+  const contentType = response.headers.get("content-type");
+  if (contentType && contentType.includes("application/json")) {
+    const data = await response.json();
     if (!response.ok) {
-        throw new Error(data.message || `Server Error (${response.status})`);
+        throw new Error(data.message || data.error || `Request failed with status ${response.status}`);
     }
     return data;
-  } catch (e) {
-    // If parsing fails, check if it looks like HTML (Ngrok Interstitial or 404/500 Page)
-    if (text.trim().startsWith('<')) {
-       const isNgrok = text.includes('ngrok') || text.includes('Visit Site');
-       if (isNgrok) {
-         throw new Error("Connection blocked by Ngrok Interstitial page. Please open the Backend URL in a new tab and click 'Visit Site'.");
-       }
-       throw new Error(`Backend returned HTML instead of JSON (Status ${response.status}). This usually means the endpoint URL is wrong or the server crashed.`);
-    }
-    throw new Error(`Invalid response from server: ${text.substring(0, 50)}...`);
-  }
-};
-
-// Function to test connectivity
-export const testBackendConnection = async (baseUrl: string): Promise<ConnectionTestResult> => {
-  try {
-    const cleanUrl = baseUrl.replace(/\/$/, '');
-    const response = await fetch(`${cleanUrl}/`, {
-      method: 'GET',
-      headers: getHeaders()
-    });
-
-    const data = await handleResponse(response);
-    
-    return { 
-      success: true, 
-      message: "Connected successfully to Pocat.io API",
-      details: data
-    };
-  } catch (error) {
-    return { success: false, message: (error as Error).message };
-  }
-};
-
-export const getVideoInfo = async (baseUrl: string, videoUrl: string): Promise<VideoInfoResponse> => {
-  try {
-    const cleanUrl = baseUrl.replace(/\/$/, '');
-    const response = await fetch(`${cleanUrl}/video/info?url=${encodeURIComponent(videoUrl)}`, {
-      method: 'GET',
-      headers: getHeaders()
-    });
-    return await handleResponse(response);
-  } catch (error) {
-    console.error("Get Video Info Error:", error);
-    throw error;
+  } else {
+     if (!response.ok) {
+        throw new Error(response.statusText || `Request failed with status ${response.status}`);
+     }
+     return { success: true, message: "Success", data: {} }; 
   }
 };
 
 // V2: Create Project (Downloads video)
-export const createProject = async (baseUrl: string, youtubeUrl: string, title: string = 'New Project'): Promise<CreateProjectResponse> => {
+export const createProject = async (
+  baseUrl: string, 
+  youtubeUrl: string, 
+  title: string = 'New Project', 
+  quality: string = '720p',
+  downloader: string = 'auto'
+): Promise<CreateProjectResponse> => {
   try {
     const cleanUrl = baseUrl.replace(/\/$/, '');
-    // Using a hardcoded userId for MVP
-    // Requesting 'yt-dlp' downloader explicitly for reliability
     const response = await fetch(`${cleanUrl}/v2/projects`, {
       method: 'POST',
       headers: getHeaders(),
@@ -166,8 +90,8 @@ export const createProject = async (baseUrl: string, youtubeUrl: string, title: 
         title,
         youtubeUrl,
         userId: 1, 
-        quality: '720p',
-        downloader: 'yt-dlp' 
+        quality: quality,
+        downloader: downloader 
       })
     });
     return await handleResponse(response);
@@ -177,29 +101,53 @@ export const createProject = async (baseUrl: string, youtubeUrl: string, title: 
   }
 };
 
-// V2: Check Download Status
-export const getProjectDownloadStatus = async (baseUrl: string, projectId: number): Promise<DownloadStatusResponse> => {
+export const testBackendConnection = async (baseUrl: string): Promise<{ success: boolean; message: string }> => {
   try {
     const cleanUrl = baseUrl.replace(/\/$/, '');
+    const response = await fetch(`${cleanUrl}/health`, { 
+        method: 'GET',
+        headers: getHeaders()
+    }).catch(() => null);
+
+    if (response && response.ok) {
+        return { success: true, message: "Connected" };
+    }
+
+    // Try root as fallback
+    const rootRes = await fetch(`${cleanUrl}/`, { method: 'GET' }).catch(() => null);
+    if (rootRes && rootRes.ok) {
+        return { success: true, message: "Connected (Root)" };
+    }
+
+    throw new Error("Connection failed");
+  } catch (error) {
+    return { success: false, message: (error as Error).message || "Connection Failed" };
+  }
+};
+
+export const getProjectDownloadStatus = async (baseUrl: string, projectId: number): Promise<ProjectStatusResponse> => {
+  try {
+    const cleanUrl = baseUrl.replace(/\/$/, '');
+    // Corrected endpoint: /v2/projects/:id/download-status
     const response = await fetch(`${cleanUrl}/v2/projects/${projectId}/download-status`, {
-      method: 'GET',
-      headers: getHeaders()
+        method: 'GET',
+        headers: getHeaders()
     });
     return await handleResponse(response);
   } catch (error) {
-    console.error("Get Download Status Error:", error);
+    console.error("Get Status Error:", error);
     throw error;
   }
 };
 
-// V2: Batch Process Clips
-export const batchProcessClips = async (baseUrl: string, projectId: number, clips: ClipRequest[]): Promise<BatchProcessResponse> => {
+export const batchProcessClips = async (baseUrl: string, projectId: number, clips: any[]): Promise<ClipProcessingResponse> => {
   try {
     const cleanUrl = baseUrl.replace(/\/$/, '');
+    // Corrected endpoint: /v2/projects/:id/batch-clips
     const response = await fetch(`${cleanUrl}/v2/projects/${projectId}/batch-clips`, {
-      method: 'POST',
-      headers: getHeaders(),
-      body: JSON.stringify({ clips })
+        method: 'POST',
+        headers: getHeaders(),
+        body: JSON.stringify({ clips })
     });
     return await handleResponse(response);
   } catch (error) {
@@ -208,32 +156,33 @@ export const batchProcessClips = async (baseUrl: string, projectId: number, clip
   }
 };
 
-export const renderClip = async (baseUrl: string, payload: RenderRequestPayload): Promise<RenderResponse> => {
+export const renderClip = async (baseUrl: string, payload: any): Promise<RenderClipResponse> => {
   try {
     const cleanUrl = baseUrl.replace(/\/$/, '');
+    // Corrected endpoint: /clips/render
     const response = await fetch(`${cleanUrl}/clips/render`, {
-      method: 'POST',
-      headers: getHeaders(),
-      body: JSON.stringify(payload),
+        method: 'POST',
+        headers: getHeaders(),
+        body: JSON.stringify(payload)
     });
-
     return await handleResponse(response);
   } catch (error) {
-    console.error("Render Clip Service Error:", error);
+    console.error("Render Clip Error:", error);
     throw error;
   }
 };
 
-export const checkClipStatus = async (baseUrl: string, clipId: string): Promise<StatusResponse> => {
+export const checkClipStatus = async (baseUrl: string, clipId: string): Promise<ClipStatusResponse> => {
   try {
     const cleanUrl = baseUrl.replace(/\/$/, '');
+    // Corrected endpoint: /clips/status/:clipId
     const response = await fetch(`${cleanUrl}/clips/status/${clipId}`, {
-         headers: getHeaders()
+        method: 'GET',
+        headers: getHeaders()
     });
-    
     return await handleResponse(response);
   } catch (error) {
-    console.error("Check Status Error:", error);
+    console.error("Check Clip Status Error:", error);
     throw error;
   }
 };

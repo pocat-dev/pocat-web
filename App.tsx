@@ -11,11 +11,14 @@ import { renderClip, checkClipStatus, testBackendConnection, createProject, getP
 type ViewType = 'editor' | 'library' | 'settings';
 
 // Default to local development backend
-const DEFAULT_BACKEND_URL = 'http://127.0.0.1:3333';
+const DEFAULT_BACKEND_URL = 'https://nonimitating-corie-extemporary.ngrok-free.dev';
 
 export default function App() {
   // Navigation State
   const [activeView, setActiveView] = useState<ViewType>('editor');
+  
+  // Analysis Sidebar Tab State (lifted from sidebar for external control)
+  const [analysisTab, setAnalysisTab] = useState<'clips' | 'frame' | 'custom'>('clips');
 
   // Backend Configuration State
   const [backendUrl, setBackendUrl] = useState(() => {
@@ -43,6 +46,8 @@ export default function App() {
   
   // YouTube Input State
   const [youtubeLink, setYoutubeLink] = useState('');
+  const [downloadQuality, setDownloadQuality] = useState('720p');
+  const [downloaderMethod, setDownloaderMethod] = useState('auto');
   const [isImporting, setIsImporting] = useState(false);
   const [importStatus, setImportStatus] = useState('');
 
@@ -122,12 +127,12 @@ export default function App() {
     if (!youtubeLink.trim()) return;
 
     setIsImporting(true);
-    setImportStatus('Initializing project...');
+    setImportStatus(`Initializing ${downloadQuality} project...`);
     
     try {
         // V2 Workflow: Create Project & Download
         const title = "New Project " + new Date().toLocaleTimeString();
-        const createRes = await createProject(backendUrl, youtubeLink, title);
+        const createRes = await createProject(backendUrl, youtubeLink, title, downloadQuality, downloaderMethod);
         
         if (!createRes.success) {
             throw new Error(createRes.message);
@@ -170,10 +175,9 @@ export default function App() {
                     setImportStatus('');
                     setIsImporting(false);
                     
-                    // Construct stream URL for the downloaded file
-                    // Format: BASE_URL/storage/downloads/project_{ID}_full.mp4
+                    // Construct stream URL for the downloaded file using the STREAM endpoint
                     const cleanBaseUrl = backendUrl.replace(/\/$/, '');
-                    const streamUrl = `${cleanBaseUrl}/storage/downloads/project_${projectId}_full.mp4`;
+                    const streamUrl = `${cleanBaseUrl}/v2/projects/${projectId}/stream`;
                     
                     console.log("Video ready! Switching to stream:", streamUrl);
                     
@@ -251,7 +255,7 @@ export default function App() {
   // Handler untuk Export/Render Clip with Polling
   const handleExportClip = async (clip: ViralClip) => {
     // Both youtube (demo) and backend-stream (real) modes use the render endpoint
-    if (!youtubeLink) {
+    if (!youtubeLink && !videoState.url) {
       alert("No video source found.");
       return;
     }
@@ -272,7 +276,7 @@ export default function App() {
           }]);
           
           if (processRes.success) {
-             alert(`✅ Clip processing started on server!\n\nStatus: ${processRes.data.estimatedTime}\n\nSince this is a background process, the clip will be saved to your Project Library on the server once complete.`);
+             alert(`✅ Clip processing started on server!\n\nStatus: ${processRes.data.estimatedTime || 'Processing'}\n\nSince this is a background process, the clip will be saved to your Project Library on the server once complete.`);
           } else {
              throw new Error(processRes.message);
           }
@@ -311,16 +315,22 @@ export default function App() {
           try {
             const statusRes = await checkClipStatus(backendUrl, clipId);
             
-            if (statusRes.status === 'completed' && statusRes.downloadUrl) {
-              clearInterval(pollInterval);
-              window.open(statusRes.downloadUrl, '_blank');
-              resolve();
-            } else if (statusRes.status === 'failed') {
-              clearInterval(pollInterval);
-              reject(new Error("Server reported render failure"));
+            // Fix: Check statusRes.data as standardized in backend.ts
+            if (statusRes.success && statusRes.data) {
+              if (statusRes.data.status === 'completed' && statusRes.data.downloadUrl) {
+                clearInterval(pollInterval);
+                window.open(statusRes.data.downloadUrl, '_blank');
+                resolve();
+              } else if (statusRes.data.status === 'failed') {
+                clearInterval(pollInterval);
+                reject(new Error(statusRes.data.error || "Server reported render failure"));
+              } else if (attempts >= maxAttempts) {
+                clearInterval(pollInterval);
+                reject(new Error("Render timed out. Please check 'My Projects' later."));
+              }
             } else if (attempts >= maxAttempts) {
-              clearInterval(pollInterval);
-              reject(new Error("Render timed out. Please check 'My Projects' later."));
+               clearInterval(pollInterval);
+               reject(new Error("Render timed out (Invalid Response)."));
             }
           } catch (e) {
             console.error("Polling error", e);
@@ -336,6 +346,31 @@ export default function App() {
       console.error("Export failed", e);
       alert("Export failed: " + (e as Error).message);
     }
+  };
+
+  const handleQuickExport = async (start: number, end: number) => {
+    if (end <= start) {
+        alert("End time must be greater than start time");
+        return;
+    }
+    
+    // Helper to format MM:SS
+    const formatTime = (time: number) => {
+         const minutes = Math.floor(time / 60);
+         const seconds = Math.floor(time % 60);
+         return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+    };
+
+    const customClip: ViralClip = {
+        id: `quick_${Date.now()}`,
+        title: "Quick Export Clip",
+        start: formatTime(start),
+        end: formatTime(end),
+        viralScore: 0,
+        description: "Quick manual selection",
+        reasoning: "User Selection",
+    };
+    await handleExportClip(customClip);
   };
 
   const captureFrame = async (): Promise<Blob | null> => {
@@ -698,6 +733,37 @@ export default function App() {
                     onChange={(e) => setYoutubeLink(e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && handleYouTubeImport()}
                   />
+                  
+                  {/* Downloader Method Selector */}
+                  <div className="border-l border-slate-700 h-full">
+                    <select
+                        value={downloaderMethod}
+                        onChange={(e) => setDownloaderMethod(e.target.value)}
+                        className="bg-slate-800 text-xs text-slate-300 px-2 py-2.5 h-full focus:outline-none hover:text-white cursor-pointer font-mono border-r border-slate-700"
+                        title="Download Method"
+                    >
+                        <option value="auto">Auto</option>
+                        <option value="yt-dlp">yt-dlp</option>
+                        <option value="ytdl-core">ytdl-core</option>
+                        <option value="puppeteer">Puppeteer</option>
+                    </select>
+                  </div>
+
+                  {/* Quality Selector */}
+                  <div className="border-l border-slate-700 h-full">
+                    <select
+                        value={downloadQuality}
+                        onChange={(e) => setDownloadQuality(e.target.value)}
+                        className="bg-slate-800 text-xs text-slate-300 px-2 py-2.5 h-full focus:outline-none hover:text-white cursor-pointer font-mono"
+                        title="Download Quality"
+                    >
+                        <option value="360p">360p</option>
+                        <option value="720p">720p</option>
+                        <option value="1080p">1080p</option>
+                        <option value="4k">4K</option>
+                    </select>
+                  </div>
+
                   <button 
                     onClick={handleYouTubeImport}
                     disabled={isImporting || !youtubeLink}
@@ -766,6 +832,8 @@ export default function App() {
                     onDurationChange={handleDurationChange}
                     aspectRatio={aspectRatio}
                     downloadStatus={isImporting ? importStatus : undefined}
+                    onManualExport={() => setAnalysisTab('custom')}
+                    onQuickExport={handleQuickExport}
                   />
                 </div>
 
@@ -816,6 +884,8 @@ export default function App() {
                 currentTime={videoState.currentTime}
                 duration={videoState.duration}
                 isYouTube={videoState.sourceType === 'youtube'}
+                activeTab={analysisTab}
+                onTabChange={setAnalysisTab}
               />
 
             </div>

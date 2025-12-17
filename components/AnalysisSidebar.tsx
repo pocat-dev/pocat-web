@@ -14,6 +14,8 @@ interface AnalysisSidebarProps {
   currentTime: number;
   duration: number;
   isYouTube: boolean;
+  activeTab: 'clips' | 'frame' | 'custom';
+  onTabChange: (tab: 'clips' | 'frame' | 'custom') => void;
 }
 
 export const AnalysisSidebar: React.FC<AnalysisSidebarProps> = ({ 
@@ -28,9 +30,10 @@ export const AnalysisSidebar: React.FC<AnalysisSidebarProps> = ({
   onExportClip,
   currentTime,
   duration,
-  isYouTube
+  isYouTube,
+  activeTab,
+  onTabChange
 }) => {
-  const [activeTab, setActiveTab] = useState<'clips' | 'frame' | 'custom'>('clips');
   const [exportingId, setExportingId] = useState<string | null>(null);
   
   // Custom clip state
@@ -79,19 +82,19 @@ export const AnalysisSidebar: React.FC<AnalysisSidebarProps> = ({
         {/* Tabs */}
         <div className="flex bg-slate-800 p-1 rounded-lg">
           <button 
-            onClick={() => setActiveTab('clips')}
+            onClick={() => onTabChange('clips')}
             className={`flex-1 py-2 text-xs font-medium rounded-md transition-all ${activeTab === 'clips' ? 'bg-slate-700 text-white shadow-sm' : 'text-slate-400 hover:text-slate-200'}`}
           >
             Viral Clips
           </button>
           <button 
-            onClick={() => setActiveTab('custom')}
+            onClick={() => onTabChange('custom')}
             className={`flex-1 py-2 text-xs font-medium rounded-md transition-all ${activeTab === 'custom' ? 'bg-slate-700 text-white shadow-sm' : 'text-slate-400 hover:text-slate-200'}`}
           >
             Manual
           </button>
           <button 
-            onClick={() => setActiveTab('frame')}
+            onClick={() => onTabChange('frame')}
             className={`flex-1 py-2 text-xs font-medium rounded-md transition-all ${activeTab === 'frame' ? 'bg-slate-700 text-white shadow-sm' : 'text-slate-400 hover:text-slate-200'}`}
           >
             AI Frame
@@ -151,7 +154,7 @@ export const AnalysisSidebar: React.FC<AnalysisSidebarProps> = ({
                   </ul>
                 </div>
                 <button
-                  onClick={() => setActiveTab('custom')}
+                  onClick={() => onTabChange('custom')}
                   className="mt-6 w-full py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg text-xs font-medium transition-colors"
                 >
                   Go to Manual Selection
