@@ -79,6 +79,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
   };
 
   const isPortrait = aspectRatio === AspectRatio.PORTRAIT;
+  const isValidDuration = quickEnd > quickStart;
 
   return (
     <div ref={containerRef} className="relative w-full h-full bg-black flex items-center justify-center overflow-hidden group select-none">
@@ -135,31 +136,47 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
                                 </div>
 
                                 {showQuickClip && (
-                                    <div className="mt-2 bg-slate-800/80 p-5 rounded-xl border border-slate-600 animate-fade-in text-left backdrop-blur-sm">
+                                    <div className="mt-2 bg-slate-800/80 p-5 rounded-xl border border-slate-600 animate-fade-in text-left backdrop-blur-sm relative overflow-hidden">
                                         <div className="grid grid-cols-2 gap-4 mb-4">
                                             <div>
-                                                <label className="text-[10px] text-slate-400 uppercase font-bold block mb-1.5">Start (sec)</label>
+                                                <label className="text-[10px] text-slate-400 uppercase font-bold block mb-1.5 flex items-center justify-between">
+                                                    Start (sec)
+                                                    <i className="fa-regular fa-clock text-slate-500"></i>
+                                                </label>
                                                 <input 
                                                     type="number" 
+                                                    min="0"
                                                     value={quickStart}
-                                                    onChange={(e) => setQuickStart(Number(e.target.value))}
-                                                    className="w-full bg-slate-900 border border-slate-600 rounded-lg px-3 py-2 text-white text-sm font-mono focus:border-purple-500 focus:ring-1 focus:ring-purple-500 outline-none transition-all"
+                                                    onChange={(e) => setQuickStart(Math.max(0, Number(e.target.value)))}
+                                                    className={`w-full bg-slate-900 border ${!isValidDuration ? 'border-red-500/50 focus:border-red-500' : 'border-slate-600 focus:border-purple-500'} rounded-lg px-3 py-2 text-white text-sm font-mono outline-none transition-all focus:ring-1`}
                                                 />
                                             </div>
                                             <div>
-                                                <label className="text-[10px] text-slate-400 uppercase font-bold block mb-1.5">End (sec)</label>
+                                                <label className="text-[10px] text-slate-400 uppercase font-bold block mb-1.5 flex items-center justify-between">
+                                                    End (sec)
+                                                    <i className="fa-regular fa-clock text-slate-500"></i>
+                                                </label>
                                                 <input 
                                                     type="number" 
+                                                    min="0"
                                                     value={quickEnd}
-                                                    onChange={(e) => setQuickEnd(Number(e.target.value))}
-                                                    className="w-full bg-slate-900 border border-slate-600 rounded-lg px-3 py-2 text-white text-sm font-mono focus:border-purple-500 focus:ring-1 focus:ring-purple-500 outline-none transition-all"
+                                                    onChange={(e) => setQuickEnd(Math.max(0, Number(e.target.value)))}
+                                                    className={`w-full bg-slate-900 border ${!isValidDuration ? 'border-red-500/50 focus:border-red-500' : 'border-slate-600 focus:border-purple-500'} rounded-lg px-3 py-2 text-white text-sm font-mono outline-none transition-all focus:ring-1`}
                                                 />
                                             </div>
                                         </div>
+                                        
+                                        {!isValidDuration && (
+                                            <div className="mb-3 px-3 py-2 bg-red-500/10 border border-red-500/20 rounded-lg flex items-center gap-2 text-red-400 text-xs animate-pulse">
+                                                <i className="fa-solid fa-circle-exclamation"></i>
+                                                <span>End time must be greater than start time.</span>
+                                            </div>
+                                        )}
+
                                         <button 
                                             onClick={handleQuickExportClick}
-                                            disabled={isQuickExporting || quickEnd <= quickStart}
-                                            className="w-full py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-bold rounded-lg flex items-center justify-center gap-2 shadow-lg"
+                                            disabled={isQuickExporting || !isValidDuration}
+                                            className="w-full py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-bold rounded-lg flex items-center justify-center gap-2 shadow-lg transition-all"
                                         >
                                             {isQuickExporting ? <i className="fa-solid fa-circle-notch animate-spin"></i> : <i className="fa-solid fa-bolt"></i>}
                                             {isQuickExporting ? 'Processing...' : 'Generate Clip'}
@@ -274,52 +291,72 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
 
            {/* Quick Clip Overlay Panel */}
            {showQuickClip && !downloadStatus && (
-               <div className="absolute top-4 right-4 z-30 w-64 bg-slate-900/95 backdrop-blur-md border border-slate-700 rounded-xl p-4 shadow-2xl animate-fade-in">
-                  <div className="flex justify-between items-center mb-3">
-                      <h4 className="text-white font-bold text-sm">Quick Clip</h4>
+               <div className="absolute top-4 right-4 z-30 w-72 bg-slate-900/95 backdrop-blur-md border border-slate-700 rounded-xl p-4 shadow-2xl animate-fade-in">
+                  <div className="flex justify-between items-center mb-4">
+                      <h4 className="text-white font-bold text-sm flex items-center gap-2">
+                        <i className="fa-solid fa-scissors text-purple-400"></i>
+                        Quick Clip
+                      </h4>
                       <button onClick={() => setShowQuickClip(false)} className="text-slate-400 hover:text-white">
                           <i className="fa-solid fa-times"></i>
                       </button>
                   </div>
-                  <div className="space-y-3">
-                      <div className="flex gap-2">
-                        <div>
-                            <label className="text-[9px] text-slate-400 uppercase font-bold block mb-1">Start</label>
+                  <div className="space-y-4">
+                      <div className="flex gap-3">
+                        <div className="flex-1">
+                            <label className="text-[9px] text-slate-400 uppercase font-bold block mb-1.5 flex items-center justify-between">
+                                Start (s)
+                            </label>
                             <input 
                                 type="number" 
+                                min="0"
                                 value={quickStart} 
-                                onChange={(e) => setQuickStart(Number(e.target.value))}
-                                className="w-full bg-slate-800 border border-slate-600 rounded px-2 py-1 text-white text-xs font-mono"
+                                onChange={(e) => setQuickStart(Math.max(0, Number(e.target.value)))}
+                                className={`w-full bg-slate-800 border ${!isValidDuration ? 'border-red-500/50 focus:border-red-500' : 'border-slate-600 focus:border-purple-500'} rounded px-2 py-1.5 text-white text-xs font-mono focus:outline-none focus:ring-1 transition-colors`}
                             />
                         </div>
-                        <div>
-                            <label className="text-[9px] text-slate-400 uppercase font-bold block mb-1">End</label>
+                        <div className="flex-1">
+                            <label className="text-[9px] text-slate-400 uppercase font-bold block mb-1.5 flex items-center justify-between">
+                                End (s)
+                            </label>
                             <input 
                                 type="number" 
+                                min="0"
                                 value={quickEnd} 
-                                onChange={(e) => setQuickEnd(Number(e.target.value))}
-                                className="w-full bg-slate-800 border border-slate-600 rounded px-2 py-1 text-white text-xs font-mono"
+                                onChange={(e) => setQuickEnd(Math.max(0, Number(e.target.value)))}
+                                className={`w-full bg-slate-800 border ${!isValidDuration ? 'border-red-500/50 focus:border-red-500' : 'border-slate-600 focus:border-purple-500'} rounded px-2 py-1.5 text-white text-xs font-mono focus:outline-none focus:ring-1 transition-colors`}
                             />
                         </div>
                       </div>
-                      <div className="flex gap-2 mt-2">
+                      
+                      <div className="flex gap-2">
                           <button 
                              onClick={() => { setQuickStart(Math.floor(currentTime)); }}
-                             className="flex-1 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 text-[10px] rounded border border-slate-700"
+                             className="flex-1 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 text-[10px] rounded border border-slate-700 transition-colors"
+                             title="Set start to current playback time"
                           >
                              Set Start
                           </button>
                           <button 
                              onClick={() => { setQuickEnd(Math.floor(currentTime)); }}
-                             className="flex-1 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 text-[10px] rounded border border-slate-700"
+                             className="flex-1 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 text-[10px] rounded border border-slate-700 transition-colors"
+                             title="Set end to current playback time"
                           >
                              Set End
                           </button>
                       </div>
+
+                      {!isValidDuration && (
+                         <div className="px-3 py-2 bg-red-500/10 border border-red-500/20 rounded flex items-center gap-2 text-red-400 text-[10px]">
+                             <i className="fa-solid fa-circle-exclamation"></i>
+                             <span>Invalid Duration</span>
+                         </div>
+                      )}
+
                       <button 
                         onClick={handleQuickExportClick}
-                        disabled={isQuickExporting || quickEnd <= quickStart}
-                        className="w-full py-2 bg-purple-600 hover:bg-purple-500 text-white rounded font-bold text-xs flex items-center justify-center gap-2"
+                        disabled={isQuickExporting || !isValidDuration}
+                        className="w-full py-2 bg-purple-600 hover:bg-purple-500 text-white rounded font-bold text-xs flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
                       >
                          {isQuickExporting ? <i className="fa-solid fa-circle-notch animate-spin"></i> : <i className="fa-solid fa-bolt"></i>}
                          Create Clip

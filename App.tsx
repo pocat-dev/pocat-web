@@ -51,6 +51,14 @@ export default function App() {
   const [isImporting, setIsImporting] = useState(false);
   const [importStatus, setImportStatus] = useState('');
 
+  // Project Library State
+  const [projects, setProjects] = useState([
+    { id: 1, title: "Podcast Interview #1", edited: "2 hours ago", duration: "12:40", clips: 5, ratio: "9:16" },
+    { id: 2, title: "Product Launch Event", edited: "1 day ago", duration: "45:10", clips: 12, ratio: "9:16" },
+    { id: 3, title: "Gaming Stream Highlights", edited: "3 days ago", duration: "08:15", clips: 3, ratio: "16:9" }
+  ]);
+  const [projectToDelete, setProjectToDelete] = useState<number | null>(null);
+
   // Refs
   const videoRef = useRef<HTMLVideoElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -529,10 +537,22 @@ export default function App() {
     }
   };
 
+  const handleDeleteProject = (e: React.MouseEvent, id: number) => {
+    e.stopPropagation();
+    setProjectToDelete(id);
+  };
+
+  const confirmDeleteProject = () => {
+    if (projectToDelete !== null) {
+      setProjects(prev => prev.filter(p => p.id !== projectToDelete));
+      setProjectToDelete(null);
+    }
+  };
+
   // --- VIEWS ---
 
   const LibraryView = () => (
-    <div className="flex-1 p-8 bg-slate-950 overflow-y-auto">
+    <div className="flex-1 p-8 bg-slate-950 overflow-y-auto relative">
       <h2 className="text-3xl font-bold mb-6 text-white">Project Library</h2>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         
@@ -548,22 +568,70 @@ export default function App() {
           <span className="text-xs mt-2">Upload or Import</span>
         </div>
 
-        {/* Mock Project 1 */}
-        <div className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden hover:border-purple-500/50 transition-all cursor-pointer group" onClick={() => setActiveView('editor')}>
-          <div className="h-40 bg-slate-800 flex items-center justify-center relative">
-            <i className="fa-solid fa-play-circle text-4xl text-slate-600 group-hover:text-purple-500 transition-colors"></i>
-            <span className="absolute bottom-2 right-2 bg-black/60 px-2 py-1 text-xs rounded text-white font-mono">12:40</span>
-          </div>
-          <div className="p-4">
-            <h3 className="font-bold text-lg mb-1 text-white">Podcast Interview #1</h3>
-            <p className="text-slate-400 text-sm mb-3">Edited 2 hours ago</p>
-            <div className="flex gap-2">
-              <span className="px-2 py-0.5 bg-purple-500/10 text-purple-400 text-xs rounded border border-purple-500/20">5 Viral Clips</span>
-              <span className="px-2 py-0.5 bg-slate-800 text-slate-400 text-xs rounded border border-slate-700">9:16</span>
+        {/* Project List */}
+        {projects.map((project) => (
+          <div 
+            key={project.id}
+            className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden hover:border-purple-500/50 transition-all cursor-pointer group relative" 
+            onClick={() => setActiveView('editor')}
+          >
+            {/* Delete Button - Visible on Hover */}
+            <button 
+                onClick={(e) => handleDeleteProject(e, project.id)}
+                className="absolute top-2 right-2 z-10 w-8 h-8 bg-black/50 hover:bg-red-500/80 text-white/70 hover:text-white rounded-full flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 backdrop-blur-sm"
+                title="Delete Project"
+            >
+                <i className="fa-solid fa-trash-can text-xs"></i>
+            </button>
+
+            <div className="h-40 bg-slate-800 flex items-center justify-center relative">
+              <i className="fa-solid fa-play-circle text-4xl text-slate-600 group-hover:text-purple-500 transition-colors"></i>
+              <span className="absolute bottom-2 right-2 bg-black/60 px-2 py-1 text-xs rounded text-white font-mono">{project.duration}</span>
+            </div>
+            <div className="p-4">
+              <h3 className="font-bold text-lg mb-1 text-white truncate pr-2">{project.title}</h3>
+              <p className="text-slate-400 text-sm mb-3">Edited {project.edited}</p>
+              <div className="flex gap-2">
+                <span className="px-2 py-0.5 bg-purple-500/10 text-purple-400 text-xs rounded border border-purple-500/20">{project.clips} Viral Clips</span>
+                <span className="px-2 py-0.5 bg-slate-800 text-slate-400 text-xs rounded border border-slate-700">{project.ratio}</span>
+              </div>
             </div>
           </div>
-        </div>
+        ))}
       </div>
+
+      {/* Delete Confirmation Modal */}
+      {projectToDelete !== null && (
+        <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-fade-in" onClick={(e) => e.stopPropagation()}>
+            <div className="bg-slate-900 border border-slate-700 rounded-xl p-6 max-w-sm w-full shadow-2xl" onClick={e => e.stopPropagation()}>
+                <div className="flex items-center gap-3 mb-4 text-red-500">
+                    <div className="w-10 h-10 rounded-full bg-red-500/10 flex items-center justify-center">
+                        <i className="fa-solid fa-triangle-exclamation text-lg"></i>
+                    </div>
+                    <h3 className="text-xl font-bold text-white">Delete Project?</h3>
+                </div>
+                
+                <p className="text-slate-400 text-sm mb-6 leading-relaxed">
+                    Are you sure you want to delete <span className="text-white font-semibold">"{projects.find(p => p.id === projectToDelete)?.title}"</span>? <br/>This action cannot be undone.
+                </p>
+                
+                <div className="flex gap-3 justify-end">
+                    <button 
+                        onClick={() => setProjectToDelete(null)}
+                        className="px-4 py-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 rounded-lg text-sm font-medium transition-colors"
+                    >
+                        Cancel
+                    </button>
+                    <button 
+                        onClick={confirmDeleteProject}
+                        className="px-4 py-2 bg-red-600 hover:bg-red-500 text-white rounded-lg text-sm font-medium transition-colors shadow-lg shadow-red-900/20"
+                    >
+                        Delete Project
+                    </button>
+                </div>
+            </div>
+        </div>
+      )}
     </div>
   );
 
