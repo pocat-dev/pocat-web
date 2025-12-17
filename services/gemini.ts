@@ -1,3 +1,4 @@
+
 import { GoogleGenAI, Type, Schema } from "@google/genai";
 import { AIAnalysisResult, ViralClip } from "../types";
 
@@ -8,21 +9,29 @@ const blobToBase64 = (blob: Blob): Promise<string> => {
     reader.onloadend = () => {
       const base64String = reader.result as string;
       // Remove data url prefix (e.g. "data:image/jpeg;base64,")
-      resolve(base64String.split(',')[1]);
+      // Handle cases where the prefix might be different or missing
+      if (base64String.includes(',')) {
+          resolve(base64String.split(',')[1]);
+      } else {
+          resolve(base64String);
+      }
     };
     reader.onerror = reject;
     reader.readAsDataURL(blob);
   });
 };
 
-export const analyzeFrame = async (imageBlob: Blob, contextText: string): Promise<AIAnalysisResult> => {
-  try {
+const getAIClient = () => {
     const apiKey = process.env.API_KEY;
     if (!apiKey) {
-      throw new Error("API Key is missing");
+      throw new Error("Gemini API Key is missing from environment variables.");
     }
+    return new GoogleGenAI({ apiKey });
+};
 
-    const ai = new GoogleGenAI({ apiKey });
+export const analyzeFrame = async (imageBlob: Blob, contextText: string): Promise<AIAnalysisResult> => {
+  try {
+    const ai = getAIClient();
     const base64Data = await blobToBase64(imageBlob);
 
     const schema: Schema = {
@@ -69,17 +78,18 @@ export const analyzeFrame = async (imageBlob: Blob, contextText: string): Promis
       return JSON.parse(response.text) as AIAnalysisResult;
     }
     
-    throw new Error("No response from AI");
+    throw new Error("No textual response from Gemini AI");
 
   } catch (error) {
-    console.error("Gemini Analysis Error:", error);
-    // Fallback mock data in case of API failure
+    console.error("Gemini Frame Analysis Error:", error);
+    
+    // Return a graceful fallback instead of crashing the UI
     return {
-      title: "AI Analysis Failed",
+      title: "Analysis Unavailable",
       viralScore: 0,
-      reasoning: "Could not connect to Gemini API. Please check your API key.",
-      hashtags: ["#error", "#tryagain"],
-      suggestedCaption: "Please try again."
+      reasoning: `Error: ${(error as Error).message}. Ensure your API Key is valid.`,
+      hashtags: ["#error"],
+      suggestedCaption: "Please try again later or check your connection."
     };
   }
 };
@@ -89,10 +99,7 @@ export const analyzeVideoSegments = async (
   contextText: string
 ): Promise<ViralClip[]> => {
   try {
-    const apiKey = process.env.API_KEY;
-    if (!apiKey) throw new Error("API Key is missing");
-
-    const ai = new GoogleGenAI({ apiKey });
+    const ai = getAIClient();
 
     // Prepare parts: Interleave text (timestamp) and image
     const parts: any[] = [{
@@ -104,7 +111,14 @@ export const analyzeVideoSegments = async (
              For each clip, estimate a start and end time based on the timestamps provided, give it a viral score, and a title.`
     }];
 
-    for (const frame of frames) {
+    // Limit frames to avoid hitting payload size limits (Gemini has input limits)
+    // Sending too many high-res images can cause 413 or 400 errors.
+    // We'll take a max of 15 frames for safety.
+    const maxFrames = 15;
+    const stride = Math.ceil(frames.length / maxFrames);
+    const selectedFrames = frames.filter((_, i) => i % stride === 0).slice(0, maxFrames);
+
+    for (const frame of selectedFrames) {
       const base64 = await blobToBase64(frame.blob);
       parts.push({ text: `Frame at ${Math.floor(frame.timestamp)} seconds:` });
       parts.push({
@@ -143,12 +157,19 @@ export const analyzeVideoSegments = async (
     });
 
     if (response.text) {
-      return JSON.parse(response.text) as ViralClip[];
+      const clips = JSON.parse(response.text) as ViralClip[];
+      // Assign fallback IDs if missing
+      return clips.map((c, i) => ({
+          ...c,
+          id: c.id || `auto_clip_${i}_${Date.now()}`
+      }));
     }
+    
     return [];
 
   } catch (error) {
-    console.error("Segment Analysis Error:", error);
+    console.error("Gemini Video Segment Error:", error);
+    // Don't crash, just return empty list so the UI says "No clips found"
     return [];
   }
 };
