@@ -3,7 +3,8 @@
    ============================================ */
 
 /* Base Button */
-.btn {
+.btn,
+.settings-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -20,12 +21,14 @@
   user-select: none;
 }
 
-.btn:focus-visible {
+.btn:focus-visible,
+.settings-btn:focus-visible {
   outline: var(--ring-width) solid var(--ring-color);
   outline-offset: var(--ring-offset);
 }
 
-.btn:disabled {
+.btn:disabled,
+.settings-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
   pointer-events: none;

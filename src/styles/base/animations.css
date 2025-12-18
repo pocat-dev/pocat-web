@@ -1,0 +1,39 @@
+/* =================================
+   ANIMATIONS & TRANSITIONS
+   ================================= */
+
+/* Keyframes */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+/* Animation utilities */
+.animate-fade-in { animation: fadeIn var(--duration-300) var(--ease-out); }
+.animate-slide-up { animation: slideUp var(--duration-300) var(--ease-out); }
+.animate-spin { animation: spin 1s linear infinite; }
+.animate-pulse { animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+
+/* Transition utilities */
+.transition-all { transition: all var(--duration-150) var(--ease-out); }
+.transition-colors { transition: color var(--duration-150), background-color var(--duration-150), border-color var(--duration-150); }
+.transition-transform { transition: transform var(--duration-150) var(--ease-out); }
+
+/* Hover effects */
+.hover-scale:hover { transform: scale(1.05); }
+.hover-lift:hover { transform: translateY(-2px); }

@@ -7,6 +7,8 @@
 @import './styles/base/reset.css';
 @import './styles/base/tokens.css';
 @import './styles/base/utilities.css';
+@import './styles/base/responsive.css';
+@import './styles/base/animations.css';
 
 /* Components */
 @import './styles/components/buttons.css';
@@ -14,6 +16,7 @@
 @import './styles/components/inputs.css';
 @import './styles/components/badges.css';
 @import './styles/components/tables.css';
+@import './styles/components/forms.css';
 
 /* Pages */
 @import './styles/pages/landing.css';

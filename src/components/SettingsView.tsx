@@ -189,10 +189,16 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
               <div className="settings-about-row"><span>Backend</span><span className="settings-about-value">AdonisJS + Tuyau</span></div>
               <div className="settings-about-row"><span>Frontend</span><span className="settings-about-value">React + TanStack</span></div>
               <div className="settings-about-row"><span>License</span><span className="settings-about-value">MIT</span></div>
+              <div className="settings-about-row"><span>Developer</span><span className="settings-about-value">@sandikodev</span></div>
+              <div className="settings-about-row"><span>Company</span><span className="settings-about-value">PT Koneksi Jaringan Indonesia</span></div>
             </div>
             <div className="settings-links">
               <a href="https://github.com/pocat-dev" target="_blank" rel="noopener noreferrer"><i className="fa-brands fa-github" /> GitHub</a>
-              <a href="https://twitter.com/sandikodev" target="_blank" rel="noopener noreferrer"><i className="fa-brands fa-twitter" /> Twitter</a>
+              <a href="https://twitter.com/sandikodev" target="_blank" rel="noopener noreferrer"><i className="fa-brands fa-twitter" /> @sandikodev</a>
+              <a href="https://www.linkedin.com/in/koneksi-jaringan-a0b149396/" target="_blank" rel="noopener noreferrer"><i className="fa-brands fa-linkedin" /> PT Koneksi</a>
+              <a href="https://facebook.com/konxc.id" target="_blank" rel="noopener noreferrer"><i className="fa-brands fa-facebook" /> @konxc.id</a>
+              <a href="https://instagram.com/konxc.id" target="_blank" rel="noopener noreferrer"><i className="fa-brands fa-instagram" /> @konxc.id</a>
+              <a href="https://tiktok.com/@konxc.id" target="_blank" rel="noopener noreferrer"><i className="fa-brands fa-tiktok" /> @konxc.id</a>
             </div>
           </Section>
         </div>
