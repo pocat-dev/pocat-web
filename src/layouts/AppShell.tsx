@@ -2,7 +2,7 @@ import React from 'react'
 import { Link, useLocation } from '@tanstack/react-router'
 import { useAuth } from '../contexts/AuthContext'
 
-interface DashboardLayoutProps {
+interface AppShellProps {
   children: React.ReactNode
 }
 
@@ -13,7 +13,7 @@ const navItems = [
   { to: '/settings', icon: 'fa-gear', label: 'Settings' },
 ]
 
-export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
+export const AppShell: React.FC<AppShellProps> = ({ children }) => {
   const { logout } = useAuth()
   const location = useLocation()
 

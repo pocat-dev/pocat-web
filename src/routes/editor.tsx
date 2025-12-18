@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { DashboardLayout } from '../layouts/DashboardLayout'
+import { AppShell } from '../layouts/AppShell'
 import { useAuth } from '../contexts/AuthContext'
 import { useState, useEffect } from 'react'
 import { Button, IconButton, Badge, Input, Select } from '../components/ui'
@@ -32,7 +32,7 @@ function EditorPage() {
   if (isLoading || !isAuthenticated) return <div className="loading-screen"><div className="loading-spinner" /></div>
 
   return (
-    <DashboardLayout>
+    <AppShell>
       <div className="editor-container">
         {/* Toolbar */}
         <div className="editor-toolbar">
@@ -127,6 +127,6 @@ function EditorPage() {
           <div className="editor-timeline-footer"><span>1:21:4:25</span><span>12:12:33</span></div>
         </div>
       </div>
-    </DashboardLayout>
+    </AppShell>
   )
 }

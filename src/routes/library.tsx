@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { LibraryView } from '../components/LibraryView'
-import { DashboardLayout } from '../layouts/DashboardLayout'
+import { AppShell } from '../layouts/AppShell'
 import { useAuth } from '../contexts/AuthContext'
 import { useState, useRef, useEffect } from 'react'
 import { Project } from '../services/backend'
@@ -85,13 +85,13 @@ function LibraryComponent() {
   }
 
   return (
-    <DashboardLayout>
+    <AppShell>
       <LibraryView
         projects={projects}
         isLoadingProjects={isLoadingProjects}
         onRefresh={loadProjects}
         fileInputRef={fileInputRef}
       />
-    </DashboardLayout>
+    </AppShell>
   )
 }

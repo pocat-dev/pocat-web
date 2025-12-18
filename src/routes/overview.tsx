@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate, Link } from '@tanstack/react-router'
 import { useAuth } from '../contexts/AuthContext'
-import { DashboardLayout } from '../layouts/DashboardLayout'
+import { AppShell } from '../layouts/AppShell'
 import { Badge, IconButton } from '../components/ui'
 
 export const Route = createFileRoute('/overview')({
@@ -32,7 +32,7 @@ function OverviewPage() {
   if (!isAuthenticated) { navigate({ to: '/login' }); return null }
 
   return (
-    <DashboardLayout>
+    <AppShell>
       <div className="app-content">
         <h1 className="dashboard-title">Welcome, {user?.username}</h1>
 
@@ -90,6 +90,6 @@ function OverviewPage() {
           </div>
         </div>
       </div>
-    </DashboardLayout>
+    </AppShell>
   )
 }

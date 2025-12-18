@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { SettingsView } from '../components/SettingsView'
-import { DashboardLayout } from '../layouts/DashboardLayout'
+import { AppShell } from '../layouts/AppShell'
 import { useAuth } from '../contexts/AuthContext'
 import { useState, useEffect } from 'react'
 
@@ -50,7 +50,7 @@ function SettingsComponent() {
   }
 
   return (
-    <DashboardLayout>
+    <AppShell>
       <SettingsView
         backendUrl={backendUrl}
         onBackendUrlChange={handleBackendUrlChange}
@@ -58,6 +58,6 @@ function SettingsComponent() {
         isTestingConnection={isTestingConnection}
         onTestConnection={handleTestConnection}
       />
-    </DashboardLayout>
+    </AppShell>
   )
 }
