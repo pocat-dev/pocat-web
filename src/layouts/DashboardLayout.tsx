@@ -7,7 +7,7 @@ interface DashboardLayoutProps {
 }
 
 const navItems = [
-  { to: '/dashboard', icon: 'fa-house', label: 'Home' },
+  { to: '/overview', icon: 'fa-house', label: 'Overview' },
   { to: '/editor', icon: 'fa-scissors', label: 'Editor' },
   { to: '/library', icon: 'fa-folder', label: 'Library' },
   { to: '/settings', icon: 'fa-gear', label: 'Settings' },

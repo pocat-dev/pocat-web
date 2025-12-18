@@ -42,7 +42,7 @@ function LandingPage() {
   const animationRef = useRef<number>()
 
   useEffect(() => {
-    if (!isLoading && isAuthenticated) navigate({ to: '/dashboard' })
+    if (!isLoading && isAuthenticated) navigate({ to: '/overview' })
   }, [isAuthenticated, isLoading, navigate])
 
   useEffect(() => {

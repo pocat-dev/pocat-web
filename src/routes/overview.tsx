@@ -3,8 +3,8 @@ import { useAuth } from '../contexts/AuthContext'
 import { DashboardLayout } from '../layouts/DashboardLayout'
 import { Badge, IconButton } from '../components/ui'
 
-export const Route = createFileRoute('/dashboard')({
-  component: DashboardPage,
+export const Route = createFileRoute('/overview')({
+  component: OverviewPage,
 })
 
 const stats = [
@@ -24,7 +24,7 @@ const projects = [
 
 const statusVariant = { draft: 'neutral', processing: 'processing', published: 'success' } as const
 
-function DashboardPage() {
+function OverviewPage() {
   const { user, isAuthenticated, isLoading } = useAuth()
   const navigate = useNavigate()
 

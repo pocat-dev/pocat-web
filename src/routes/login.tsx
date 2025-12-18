@@ -17,7 +17,7 @@ function LoginPage() {
   const navigate = useNavigate()
 
   useEffect(() => {
-    if (isAuthenticated) navigate({ to: '/dashboard' })
+    if (isAuthenticated) navigate({ to: '/overview' })
   }, [isAuthenticated, navigate])
 
   if (isAuthenticated) return null
@@ -27,7 +27,7 @@ function LoginPage() {
     setError('')
     setIsLoading(true)
     const success = await login(username, password)
-    if (success) navigate({ to: '/dashboard' })
+    if (success) navigate({ to: '/overview' })
     else setError('Invalid username or password')
     setIsLoading(false)
   }
