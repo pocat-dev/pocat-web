@@ -1,6 +1,6 @@
 /// <reference types="vite/client" />
 import { createRootRoute, Outlet } from '@tanstack/react-router'
-import { TanStackRouterDevtools } from '@tanstack/router-devtools'
+import { TanStackRouterDevtools } from '@tanstack/react-router-devtools'
 import { Sidebar } from '../components/Sidebar'
 import { ThemeProvider } from '../contexts/ThemeContext'
 import appCss from '../src/styles.css?url'
