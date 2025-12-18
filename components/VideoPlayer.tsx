@@ -50,7 +50,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
   }, [src]);
 
   useEffect(() => {
-    if (videoRef.current && !error && src) {
+    if (videoRef?.current && !error && src) {
       if (isPlaying) {
         videoRef.current.play().catch(e => console.error("Play failed", e));
       } else {
