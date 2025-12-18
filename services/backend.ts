@@ -39,6 +39,23 @@ export interface ClipProcessingResponse extends BackendResponse {
   }
 }
 
+export interface Project {
+  id: number;
+  title: string;
+  youtubeUrl: string;
+  status: 'pending' | 'downloading' | 'processing' | 'completed' | 'failed';
+  duration: number;
+  thumbnail?: string;
+  createdAt: string;
+  updatedAt: string;
+  videoAvailable: boolean;
+  source: 'fresh' | 'cached' | 'reference' | 'none';
+}
+
+export interface ListProjectsResponse extends BackendResponse {
+  data: Project[];
+}
+
 export interface RenderClipResponse extends BackendResponse {
   data: {
     clipId: string;
@@ -188,6 +205,18 @@ export const renderClip = async (baseUrl: string, payload: any): Promise<RenderC
       body: JSON.stringify(payload)
   });
   return handleResponse<RenderClipResponse>(response);
+};
+
+/**
+ * GET /v2/projects
+ */
+export const listProjects = async (baseUrl: string): Promise<ListProjectsResponse> => {
+  const cleanUrl = baseUrl.replace(/\/$/, '');
+  const response = await fetch(`${cleanUrl}/v2/projects`, {
+      method: 'GET',
+      headers: getHeaders()
+  });
+  return handleResponse<ListProjectsResponse>(response);
 };
 
 /**
