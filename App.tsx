@@ -1,12 +1,13 @@
 
 import React, { useState, useRef, useEffect } from 'react';
-import { VideoPlayer } from './components/VideoPlayer';
-import { Timeline } from './components/Timeline';
-import { AnalysisSidebar } from './components/AnalysisSidebar';
+import { Sidebar } from './components/Sidebar';
+import { EditorView } from './components/EditorView';
+import { LibraryView } from './components/LibraryView';
+import { SettingsView } from './components/SettingsView';
 import { VideoState, AIAnalysisResult, AspectRatio, ViralClip } from './types';
 import { analyzeFrame, analyzeVideoSegments } from './services/gemini';
 import { VideoFrameProcessor } from './services/gpuProcessor';
-import { renderClip, checkClipStatus, testBackendConnection, createProject, getProjectDownloadStatus, batchProcessClips } from './services/backend';
+import { renderClip, checkClipStatus, testBackendConnection, createProject, getProjectDownloadStatus, batchProcessClips, listProjects } from './services/backend';
 
 type ViewType = 'editor' | 'library' | 'settings';
 const DEFAULT_BACKEND_URL = 'https://nonimitating-corie-extemporary.ngrok-free.dev';
@@ -41,11 +42,8 @@ export default function App() {
   const [importStatus, setImportStatus] = useState('');
   const [loadingTitle, setLoadingTitle] = useState('Downloading & Processing');
 
-  const [projects, setProjects] = useState([
-    { id: 1, title: "Podcast Interview #1", edited: "2 hours ago", duration: "12:40", clips: 5, ratio: "9:16" },
-    { id: 2, title: "Product Launch Event", edited: "1 day ago", duration: "45:10", clips: 12, ratio: "9:16" },
-    { id: 3, title: "Gaming Stream Highlights", edited: "3 days ago", duration: "08:15", clips: 3, ratio: "16:9" }
-  ]);
+  const [projects, setProjects] = useState<any[]>([]);
+  const [isLoadingProjects, setIsLoadingProjects] = useState(false);
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -59,6 +57,37 @@ export default function App() {
   useEffect(() => {
     return () => { if (videoState.url && !videoState.url.startsWith('http')) URL.revokeObjectURL(videoState.url); };
   }, [videoState.url]);
+
+  // Load projects when component mounts or when switching to library view
+  useEffect(() => {
+    if (activeView === 'library') {
+      loadProjects();
+    }
+  }, [activeView, backendUrl]);
+
+  const loadProjects = async () => {
+    setIsLoadingProjects(true);
+    try {
+      console.log('🔄 Loading projects from:', backendUrl);
+      const response = await listProjects(backendUrl);
+      console.log('📦 Projects response:', response);
+      
+      if (response.success && Array.isArray(response.data)) {
+        console.log('✅ Projects loaded:', response.data.length);
+        setProjects(response.data);
+      } else {
+        console.error('❌ Invalid projects response:', response);
+        console.log('Response data type:', typeof response.data);
+        console.log('Is array?', Array.isArray(response.data));
+        setProjects([]); // Fallback to empty array
+      }
+    } catch (error) {
+      console.error('💥 Failed to load projects:', error);
+      setProjects([]); // Fallback to empty array
+    } finally {
+      setIsLoadingProjects(false);
+    }
+  };
 
   const handleTestConnection = async () => {
     setIsTestingConnection(true);
@@ -114,8 +143,10 @@ export default function App() {
                     return;
                 }
 
-                // FIX: Remove '= {}' default value which was causing TypeScript to infer 'video' as an empty object type.
-                const { readyForEditing, status = 'unknown', progress = 0, video } = statusRes.data;
+                // Get actual status from API response
+                const { readyForEditing, status, progress, video } = statusRes.data;
+                const actualStatus = status || 'unknown';
+                const actualProgress = progress || 0;
 
                 if (statusRes.success && readyForEditing) {
                     clearInterval(pollInterval);
@@ -137,15 +168,15 @@ export default function App() {
                     alert(`✅ Video Ready${sourceText}! You can now start clipping.`);
                     
                 } else if (statusRes.success) {
-                     // FIX: video is correctly typed now, source property is accessible.
+                     // Use actual status from API
                      const videoSource = video?.source || 'unknown';
                      const sourceLabel = videoSource === 'shared' ? ' [Shared DL]' : '';
                      
-                     // FIX: Use safe status string for toUpperCase()
-                     const displayStatus = (status || 'processing').toString().toUpperCase();
-                     setImportStatus(`${displayStatus}${sourceLabel}: ${progress}%`);
+                     // Display actual status from API
+                     const displayStatus = actualStatus.toString().toUpperCase();
+                     setImportStatus(`${displayStatus}${sourceLabel}: ${actualProgress}%`);
                      
-                     if (status === 'failed') {
+                     if (actualStatus === 'failed') {
                          clearInterval(pollInterval);
                          setImportStatus('Download Failed');
                          alert("Server Error: Video download failed.");
@@ -299,87 +330,56 @@ export default function App() {
   };
 
   return (
-    <div className="flex h-screen w-full bg-slate-950 text-slate-100 overflow-hidden">
-      <div className="w-16 bg-slate-900 border-r border-slate-700 flex flex-col items-center py-6 space-y-8 z-20">
-        <div className="text-purple-500 text-2xl font-bold cursor-pointer" onClick={() => setActiveView('editor')}><i className="fa-brands fa-google"></i></div>
-        <button onClick={() => setActiveView('editor')} className={`w-full p-3 transition-colors ${activeView === 'editor' ? 'text-purple-400 bg-slate-800/50' : 'text-slate-500 hover:text-slate-300'}`}><i className="fa-solid fa-scissors text-xl"></i></button>
-        <button onClick={() => setActiveView('library')} className={`w-full p-3 transition-colors ${activeView === 'library' ? 'text-purple-400 bg-slate-800/50' : 'text-slate-500 hover:text-slate-300'}`}><i className="fa-solid fa-layer-group text-xl"></i></button>
-        <button onClick={() => setActiveView('settings')} className={`w-full p-3 transition-colors ${activeView === 'settings' ? 'text-purple-400 bg-slate-800/50' : 'text-slate-500 hover:text-slate-300'}`}><i className="fa-solid fa-gear text-xl"></i></button>
-      </div>
-
-      <div className="flex-1 flex flex-col h-full min-w-0">
+    <div className="h-screen bg-slate-950 text-white flex">
+      <Sidebar activeView={activeView} setActiveView={setActiveView} />
+      
+      <div className="flex-1 flex flex-col">
         {activeView === 'library' && (
-           <div className="flex-1 p-8 bg-slate-950 overflow-y-auto">
-             <h2 className="text-3xl font-bold mb-6">Project Library</h2>
-             <div className="grid grid-cols-3 gap-6">
-                <div onClick={() => fileInputRef.current?.click()} className="bg-slate-900/50 border-2 border-dashed border-slate-800 rounded-xl h-64 flex flex-col items-center justify-center cursor-pointer hover:border-purple-500 transition-all text-slate-500">
-                   <i className="fa-solid fa-plus text-3xl mb-2"></i><span>New Project</span>
-                </div>
-                {projects.map(p => (
-                   <div key={p.id} className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden hover:border-purple-500 transition-all cursor-pointer">
-                      <div className="h-40 bg-slate-800 flex items-center justify-center"><i className="fa-solid fa-play-circle text-4xl text-slate-600"></i></div>
-                      <div className="p-4"><h3 className="font-bold">{p.title}</h3><p className="text-slate-400 text-sm">{p.duration} • {p.clips} clips</p></div>
-                   </div>
-                ))}
-             </div>
-           </div>
+          <LibraryView 
+            projects={projects}
+            isLoadingProjects={isLoadingProjects}
+            onRefresh={loadProjects}
+            fileInputRef={fileInputRef}
+          />
         )}
         
         {activeView === 'settings' && (
-           <div className="flex-1 p-8 bg-slate-950">
-              <div className="max-w-2xl mx-auto space-y-8">
-                <h2 className="text-3xl font-bold">Settings</h2>
-                <div className="bg-slate-900 border border-slate-800 rounded-xl p-6">
-                   <h3 className="text-xl font-semibold mb-4 flex items-center gap-2"><i className="fa-solid fa-link text-blue-500"></i> Backend Connection</h3>
-                   <div className="flex gap-2">
-                      <input type="text" value={backendUrl} onChange={(e) => {setBackendUrl(e.target.value); localStorage.setItem('backend_url', e.target.value);}} className="flex-1 bg-slate-950 border border-slate-700 rounded-lg px-4 py-2 text-white font-mono" />
-                      <button onClick={handleTestConnection} disabled={isTestingConnection} className="px-5 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg disabled:opacity-50">{isTestingConnection ? <i className="fa-solid fa-circle-notch animate-spin"></i> : "Test"}</button>
-                   </div>
-                   {connectionStatus && <div className={`mt-3 p-3 rounded-lg border flex items-center gap-3 ${connectionStatus.success ? 'bg-green-500/10 border-green-500/30 text-green-400' : 'bg-red-500/10 border-red-500/30 text-red-400'}`}><span>{connectionStatus.message}</span></div>}
-                </div>
-              </div>
-           </div>
+          <SettingsView 
+            backendUrl={backendUrl}
+            onBackendUrlChange={setBackendUrl}
+            connectionStatus={connectionStatus}
+            isTestingConnection={isTestingConnection}
+            onTestConnection={handleTestConnection}
+          />
         )}
 
         {activeView === 'editor' && (
-          <>
-            <header className="h-16 bg-slate-900/50 border-b border-slate-800 flex items-center justify-between px-6 backdrop-blur-sm">
-              <div className="flex items-center space-x-4">
-                <h1 className="text-lg font-bold">ClipGenius</h1>
-                <div className="flex items-center bg-slate-800 rounded-lg border border-slate-700 overflow-hidden ml-4">
-                  <div className="pl-3 text-red-500"><i className="fa-brands fa-youtube"></i></div>
-                  <input type="text" placeholder="Paste YouTube Link..." className="bg-transparent text-xs text-white px-3 py-2 w-64 focus:outline-none" value={youtubeLink} onChange={(e) => setYoutubeLink(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && handleYouTubeImport()} />
-                  <button onClick={handleYouTubeImport} disabled={isImporting || !youtubeLink} className="bg-slate-700 hover:bg-slate-600 px-3 py-2 text-xs font-medium transition-colors border-l border-slate-600">Import</button>
-                </div>
-              </div>
-              <div className="flex items-center space-x-3">
-                <input type="file" ref={fileInputRef} accept="video/*" onChange={handleFileUpload} className="hidden" />
-                <button onClick={() => fileInputRef.current?.click()} className="px-4 py-2 bg-purple-600 hover:bg-purple-500 text-white rounded text-sm font-medium transition-colors">Upload File</button>
-              </div>
-            </header>
-
-            <div className="flex-1 flex overflow-hidden">
-              <div className="flex-1 flex flex-col relative bg-black">
-                <div className="absolute top-4 left-1/2 -translate-x-1/2 z-10 bg-slate-900/90 border border-slate-700 rounded-full px-4 py-2 flex items-center space-x-4 shadow-xl">
-                  <button onClick={() => setAspectRatio(AspectRatio.LANDSCAPE)} className={`text-xs px-3 py-1 rounded-full ${aspectRatio === AspectRatio.LANDSCAPE ? 'bg-purple-600 text-white' : 'text-slate-400'}`}>Original</button>
-                  <button onClick={() => setAspectRatio(AspectRatio.PORTRAIT)} className={`text-xs px-3 py-1 rounded-full ${aspectRatio === AspectRatio.PORTRAIT ? 'bg-purple-600 text-white' : 'text-slate-400'}`}>Shorts (9:16)</button>
-                </div>
-                <div className="flex-1 overflow-hidden">
-                  <VideoPlayer src={videoState.url || ''} thumbnail={videoState.thumbnail || ''} videoRef={videoRef} isPlaying={videoState.isPlaying} currentTime={videoState.currentTime} duration={videoState.duration} onTimeUpdate={(t) => setVideoState(p => ({...p, currentTime: t}))} onDurationChange={(d) => setVideoState(p => ({...p, duration: d}))} aspectRatio={aspectRatio} downloadStatus={isImporting ? importStatus : undefined} loadingTitle={loadingTitle} onManualExport={() => setAnalysisTab('custom')} onQuickExport={async (s,e) => {}} />
-                </div>
-                <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-10 flex items-center space-x-6">
-                    <button onClick={() => handleSeek(Math.max(0, videoState.currentTime - 5))} className="text-white/70 hover:text-white"><i className="fa-solid fa-rotate-left text-xl"></i></button>
-                    <button onClick={() => setVideoState(p => ({...p, isPlaying: !p.isPlaying}))} className="w-14 h-14 bg-white text-black rounded-full flex items-center justify-center hover:scale-105 transition-transform">{videoState.isPlaying ? <i className="fa-solid fa-pause text-xl"></i> : <i className="fa-solid fa-play text-xl ml-1"></i>}</button>
-                    <button onClick={() => handleSeek(Math.min(videoState.duration, videoState.currentTime + 5))} className="text-white/70 hover:text-white"><i className="fa-solid fa-rotate-right text-xl"></i></button>
-                </div>
-              </div>
-              <AnalysisSidebar analysis={analysis} viralClips={viralClips} isAnalyzing={isAnalyzing} analysisProgress={analysisProgress} onAnalyzeFrame={runFrameAnalysis} onScanVideo={scanVideo} hasVideo={!!videoState.url || !!videoState.thumbnail} onPlayClip={handlePlayClip} onExportClip={handleExportClip} currentTime={videoState.currentTime} duration={videoState.duration} isYouTube={videoState.sourceType === 'youtube'} activeTab={analysisTab} onTabChange={setAnalysisTab} />
-            </div>
-
-            <div className="h-32 bg-slate-900 border-t border-slate-800 z-20">
-              <Timeline duration={videoState.duration} currentTime={videoState.currentTime} onSeek={handleSeek} clips={viralClips} />
-            </div>
-          </>
+          <EditorView 
+            videoState={videoState}
+            setVideoState={setVideoState}
+            youtubeLink={youtubeLink}
+            setYoutubeLink={setYoutubeLink}
+            isImporting={isImporting}
+            importStatus={importStatus}
+            loadingTitle={loadingTitle}
+            aspectRatio={aspectRatio}
+            setAspectRatio={setAspectRatio}
+            analysis={analysis}
+            viralClips={viralClips}
+            isAnalyzing={isAnalyzing}
+            analysisProgress={analysisProgress}
+            analysisTab={analysisTab}
+            setAnalysisTab={setAnalysisTab}
+            videoRef={videoRef}
+            fileInputRef={fileInputRef}
+            onYouTubeImport={handleYouTubeImport}
+            onFileUpload={handleFileUpload}
+            onSeek={handleSeek}
+            onAnalyzeFrame={runFrameAnalysis}
+            onScanVideo={scanVideo}
+            onPlayClip={handlePlayClip}
+            onExportClip={handleExportClip}
+          />
         )}
       </div>
     </div>
