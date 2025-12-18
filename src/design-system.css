@@ -11,6 +11,7 @@
 @import './styles/components/cards.css';
 @import './styles/components/inputs.css';
 @import './styles/components/badges.css';
+@import './styles/components/tables.css';
 
 /* Pages */
 @import './styles/pages/landing.css';
