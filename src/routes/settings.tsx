@@ -31,11 +31,58 @@ function SettingsComponent() {
 
   const handleTestConnection = async () => {
     setIsTestingConnection(true)
+    setConnectionStatus(null)
+    
     try {
-      console.log('Testing connection to:', backendUrl)
-      setConnectionStatus({ success: true, message: 'Connection successful!' })
+      const healthUrl = `${backendUrl.replace(/\/$/, '')}/health`
+      console.log('Testing connection to:', healthUrl)
+      
+      const response = await fetch(healthUrl, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        // Add timeout
+        signal: AbortSignal.timeout(10000), // 10 second timeout
+      })
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`)
+      }
+
+      const healthData = await response.json()
+      
+      // Check if health response has expected structure
+      if (healthData && (healthData.status === 'ok' || healthData.healthy === true)) {
+        setConnectionStatus({ 
+          success: true, 
+          message: `✅ Connected successfully! Server: ${healthData.version || 'Unknown'} | Status: ${healthData.status || 'Healthy'}` 
+        })
+      } else {
+        setConnectionStatus({ 
+          success: false, 
+          message: `⚠️ Server responded but health check failed: ${JSON.stringify(healthData)}` 
+        })
+      }
     } catch (error) {
-      setConnectionStatus({ success: false, message: 'Connection failed: ' + (error as Error).message })
+      console.error('Connection test failed:', error)
+      
+      if (error instanceof TypeError && error.message.includes('fetch')) {
+        setConnectionStatus({ 
+          success: false, 
+          message: '❌ Network error: Cannot reach server. Check URL and CORS settings.' 
+        })
+      } else if (error instanceof Error && error.name === 'TimeoutError') {
+        setConnectionStatus({ 
+          success: false, 
+          message: '⏱️ Connection timeout: Server took too long to respond.' 
+        })
+      } else {
+        setConnectionStatus({ 
+          success: false, 
+          message: `❌ Connection failed: ${(error as Error).message}` 
+        })
+      }
     } finally {
       setIsTestingConnection(false)
     }

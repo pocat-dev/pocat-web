@@ -111,16 +111,25 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                 className="settings-input mono"
                 placeholder="http://localhost:3333"
               />
-              <Button variant="primary" onClick={onTestConnection} loading={isTestingConnection} className="settings-btn primary">
-                Test
+              <Button 
+                variant="primary" 
+                onClick={onTestConnection} 
+                loading={isTestingConnection} 
+                className="settings-btn primary"
+                disabled={!backendUrl.trim()}
+              >
+                {isTestingConnection ? 'Testing...' : 'Test'}
               </Button>
             </div>
             {connectionStatus && (
               <div className={`settings-alert ${connectionStatus.success ? 'success' : 'error'}`}>
                 <i className={`fa-solid ${connectionStatus.success ? 'fa-check-circle' : 'fa-triangle-exclamation'}`} />
-                {connectionStatus.message}
+                <span>{connectionStatus.message}</span>
               </div>
             )}
+            <p className="settings-hint">
+              Test connection to verify backend API is accessible. The health endpoint will be checked at: <code>{backendUrl.replace(/\/$/, '')}/health</code>
+            </p>
           </Section>
 
           <Section icon="fa-film" title="Export Settings" desc="Default export preferences">
