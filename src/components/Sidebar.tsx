@@ -1,6 +1,7 @@
 import React from 'react';
-import { Link, useRouterState } from '@tanstack/react-router';
+import { Link, useRouterState, useNavigate } from '@tanstack/react-router';
 import { DarkModeToggle } from './DarkModeToggle';
+import { useAuth } from '../contexts/AuthContext';
 
 interface NavItem {
   to: string;
@@ -9,6 +10,7 @@ interface NavItem {
 }
 
 const navItems: NavItem[] = [
+  { to: '/dashboard', icon: 'fa-home', label: 'Home' },
   { to: '/editor', icon: 'fa-scissors', label: 'Editor' },
   { to: '/library', icon: 'fa-folder-open', label: 'Library' },
   { to: '/settings', icon: 'fa-gear', label: 'Settings' },
@@ -16,7 +18,14 @@ const navItems: NavItem[] = [
 
 export const Sidebar: React.FC = () => {
   const router = useRouterState();
+  const navigate = useNavigate();
+  const { logout, user } = useAuth();
   const currentPath = router.location.pathname;
+
+  const handleLogout = () => {
+    logout();
+    navigate({ to: '/' });
+  };
 
   return (
     <nav 
@@ -26,9 +35,9 @@ export const Sidebar: React.FC = () => {
     >
       {/* Logo */}
       <Link 
-        to="/"
+        to="/dashboard"
         className="w-10 h-10 flex items-center justify-center rounded-xl bg-brand-600 text-white mb-6 hover:bg-brand-700 transition-colors focus-ring"
-        aria-label="Pocat Home"
+        aria-label="Pocat Dashboard"
       >
         <i className="fa-solid fa-play text-sm" aria-hidden="true"></i>
       </Link>
@@ -55,7 +64,6 @@ export const Sidebar: React.FC = () => {
               <i className={`fa-solid ${item.icon} text-lg`} aria-hidden="true"></i>
               <span className="text-[10px] mt-0.5 font-medium">{item.label}</span>
               
-              {/* Active indicator */}
               {isActive && (
                 <span 
                   className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-brand-600 rounded-r-full"
@@ -70,6 +78,16 @@ export const Sidebar: React.FC = () => {
       {/* Bottom Actions */}
       <div className="flex flex-col gap-2 mt-auto pt-4 border-t border-primary w-full items-center">
         <DarkModeToggle />
+        
+        {/* User & Logout */}
+        <button
+          onClick={handleLogout}
+          className="w-10 h-10 flex items-center justify-center rounded-xl text-tertiary hover:text-error-600 hover:bg-error-50 dark:hover:bg-error-900/20 transition-colors focus-ring"
+          aria-label={`Logout ${user?.username}`}
+          title="Logout"
+        >
+          <i className="fa-solid fa-right-from-bracket text-lg" aria-hidden="true" />
+        </button>
       </div>
     </nav>
   );
