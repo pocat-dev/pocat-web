@@ -18,44 +18,40 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
   const location = useLocation()
 
   return (
-    <div className="app-shell">
+    <div className="dashboard-layout">
       {/* Sidebar */}
-      <aside className="sidebar">
+      <aside className="dashboard-sidebar">
         {/* Logo */}
-        <div className="sidebar-logo">
-          <div className="w-10 h-10 bg-gradient-to-br from-violet-500 to-violet-700 rounded-xl flex items-center justify-center">
-            <i className="fa-solid fa-play text-white" aria-hidden="true" />
+        <div className="dashboard-sidebar-logo">
+          <div className="dashboard-logo">
+            <i className="fa-solid fa-play" aria-hidden="true" />
           </div>
         </div>
 
         {/* Navigation */}
-        <nav className="sidebar-nav">
+        <nav className="dashboard-sidebar-nav">
           {navItems.map((item) => (
             <Link
               key={item.to}
               to={item.to}
-              className={`sidebar-item ${location.pathname === item.to ? 'active' : ''}`}
+              className={`dashboard-sidebar-item ${location.pathname === item.to ? 'active' : ''}`}
               title={item.label}
             >
-              <i className={`fa-solid ${item.icon} sidebar-item-icon`} aria-hidden="true" />
+              <i className={`fa-solid ${item.icon}`} aria-hidden="true" />
             </Link>
           ))}
         </nav>
 
         {/* Footer */}
-        <div className="sidebar-footer">
-          <button
-            onClick={logout}
-            className="sidebar-item"
-            title="Logout"
-          >
-            <i className="fa-solid fa-right-from-bracket sidebar-item-icon" aria-hidden="true" />
+        <div className="dashboard-sidebar-footer">
+          <button onClick={logout} className="dashboard-sidebar-item" title="Logout">
+            <i className="fa-solid fa-right-from-bracket" aria-hidden="true" />
           </button>
         </div>
       </aside>
 
       {/* Main Content */}
-      <main className="app-main">
+      <main className="dashboard-main">
         {children}
       </main>
     </div>
