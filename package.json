@@ -10,10 +10,12 @@
   },
   "dependencies": {
     "@google/genai": "^1.33.0",
+    "@tailwindcss/vite": "^4.1.18",
     "@tanstack/react-router": "^1.141.6",
     "@tanstack/router-devtools": "^1.141.6",
     "react": "^19.2.3",
-    "react-dom": "^19.2.3"
+    "react-dom": "^19.2.3",
+    "tailwindcss": "^4.1.18"
   },
   "devDependencies": {
     "@tanstack/router-cli": "^1.141.7",
