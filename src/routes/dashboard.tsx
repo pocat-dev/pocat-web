@@ -6,14 +6,29 @@ export const Route = createFileRoute('/dashboard')({
   component: DashboardPage,
 })
 
+const stats = [
+  { label: 'Total Projects', value: '57', icon: 'fa-folder' },
+  { label: 'Clips Created', value: '286', icon: 'fa-scissors' },
+  { label: 'Processing', value: '5', icon: 'fa-spinner' },
+  { label: 'Storage Used', value: '3.5 GB', icon: 'fa-hard-drive', extra: '35%' },
+]
+
+const projects = [
+  { title: 'Summer Vacation 2024', date: 'Today at 10:30 AM', status: 'draft' },
+  { title: 'Product Demo - v2', date: 'Yesterday at 4:15 PM', status: 'processing' },
+  { title: 'Client Testimonial', date: 'Oct 26 at 2:00 PM', status: 'published' },
+  { title: 'Social Media Clips', date: 'Oct 25 at 11:45 AM', status: 'draft' },
+  { title: 'Gaming Montage', date: 'Oct 24 at 9:00 AM', status: 'published' },
+]
+
 function DashboardPage() {
   const { user, isAuthenticated, isLoading } = useAuth()
   const navigate = useNavigate()
 
   if (isLoading) {
     return (
-      <div className="h-screen flex items-center justify-center bg-surface">
-        <div className="w-8 h-8 border-3 border-brand-200 border-t-brand-600 rounded-full animate-spin" />
+      <div className="h-screen flex items-center justify-center bg-base">
+        <div className="w-8 h-8 border-2 border-violet-500/30 border-t-violet-500 rounded-full animate-spin" />
       </div>
     )
   }
@@ -25,125 +40,99 @@ function DashboardPage() {
 
   return (
     <DashboardLayout>
-      <div className="flex-1 overflow-auto">
-        {/* Header */}
-        <header className="sticky top-0 z-10 bg-surface/80 backdrop-blur-sm border-b border-primary">
-          <div className="px-6 py-5">
-            <h1 className="text-2xl font-semibold text-primary">
-              Welcome, {user?.username}
-            </h1>
-            <p className="text-sm text-secondary mt-1">
-              Here's what's happening with your projects
-            </p>
+      <div className="app-content">
+        {/* Welcome */}
+        <div className="page-header">
+          <h1 className="text-3xl font-bold text-gradient">Welcome, {user?.username}</h1>
+        </div>
+
+        {/* Quick Actions */}
+        <div className="grid-actions mb-6">
+          <Link to="/editor" className="action-card">
+            <div className="action-card-icon">
+              <i className="fa-solid fa-plus text-lg" aria-hidden="true" />
+            </div>
+            <div className="action-card-content">
+              <div className="action-card-title">New Project</div>
+              <div className="action-card-desc">Start a new video creation</div>
+            </div>
+          </Link>
+
+          <Link to="/library" className="action-card">
+            <div className="action-card-icon" style={{ background: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)' }}>
+              <i className="fa-solid fa-folder-open text-lg" aria-hidden="true" />
+            </div>
+            <div className="action-card-content">
+              <div className="action-card-title">My Library</div>
+              <div className="action-card-desc">Access your clips and assets</div>
+            </div>
+          </Link>
+
+          <Link to="/settings" className="action-card">
+            <div className="action-card-icon" style={{ background: 'linear-gradient(135deg, #71717a 0%, #52525b 100%)' }}>
+              <i className="fa-solid fa-gear text-lg" aria-hidden="true" />
+            </div>
+            <div className="action-card-content">
+              <div className="action-card-title">Settings</div>
+              <div className="action-card-desc">Configure your preferences</div>
+            </div>
+          </Link>
+        </div>
+
+        {/* Stats */}
+        <div className="grid-stats mb-8">
+          {stats.map((stat) => (
+            <div key={stat.label} className="stat-card">
+              <div className="stat-card-icon">
+                <i className={`fa-solid ${stat.icon}`} aria-hidden="true" />
+              </div>
+              <div className="stat-card-value">
+                {stat.value}
+                {stat.extra && <span className="text-sm font-normal text-secondary ml-2">{stat.extra}</span>}
+              </div>
+              <div className="stat-card-label">{stat.label}</div>
+            </div>
+          ))}
+        </div>
+
+        {/* Recent Projects */}
+        <div className="panel">
+          <div className="panel-header">
+            <span className="panel-title">Recent Projects</span>
+            <Link to="/library" className="text-sm text-brand-400 hover:text-brand-300">
+              View All
+            </Link>
           </div>
-        </header>
-
-        {/* Content */}
-        <main className="p-6">
-          {/* Quick Actions */}
-          <section className="mb-8">
-            <h2 className="text-sm font-medium text-tertiary uppercase tracking-wide mb-4">
-              Quick Actions
-            </h2>
-            <div className="grid sm:grid-cols-3 gap-4">
-              <Link
-                to="/editor"
-                className="card card-hover p-5 flex items-center gap-4"
-              >
-                <div className="w-10 h-10 bg-brand-100 dark:bg-brand-900/30 rounded-xl flex items-center justify-center">
-                  <i className="fa-solid fa-plus text-brand-600" aria-hidden="true" />
+          <div>
+            {projects.map((project, i) => (
+              <div key={i} className="project-row">
+                <div className="project-thumb">
+                  <i className="fa-solid fa-film text-tertiary" aria-hidden="true" />
                 </div>
-                <div>
-                  <h3 className="font-medium text-primary">New Project</h3>
-                  <p className="text-sm text-secondary">Create from scratch</p>
+                <div className="project-info">
+                  <div className="project-title">{project.title}</div>
+                  <div className="project-meta">{project.date}</div>
                 </div>
-              </Link>
-
-              <Link
-                to="/library"
-                className="card card-hover p-5 flex items-center gap-4"
-              >
-                <div className="w-10 h-10 bg-info-50 dark:bg-info-900/30 rounded-xl flex items-center justify-center">
-                  <i className="fa-solid fa-folder-open text-info-600" aria-hidden="true" />
+                <span className={`badge ${
+                  project.status === 'published' ? 'badge-done' :
+                  project.status === 'processing' ? 'badge-processing' : 'badge-neutral'
+                }`}>
+                  {project.status === 'processing' && <i className="fa-solid fa-spinner animate-spin text-xs" />}
+                  {project.status === 'published' && <i className="fa-solid fa-check text-xs" />}
+                  {project.status.charAt(0).toUpperCase() + project.status.slice(1)}
+                </span>
+                <div className="flex gap-2">
+                  <button className="btn btn-ghost btn-icon btn-sm">
+                    <i className="fa-solid fa-share-nodes" aria-hidden="true" />
+                  </button>
+                  <button className="btn btn-ghost btn-icon btn-sm">
+                    <i className="fa-solid fa-ellipsis" aria-hidden="true" />
+                  </button>
                 </div>
-                <div>
-                  <h3 className="font-medium text-primary">My Library</h3>
-                  <p className="text-sm text-secondary">View all projects</p>
-                </div>
-              </Link>
-
-              <Link
-                to="/settings"
-                className="card card-hover p-5 flex items-center gap-4"
-              >
-                <div className="w-10 h-10 bg-surface-tertiary rounded-xl flex items-center justify-center">
-                  <i className="fa-solid fa-gear text-tertiary" aria-hidden="true" />
-                </div>
-                <div>
-                  <h3 className="font-medium text-primary">Settings</h3>
-                  <p className="text-sm text-secondary">Configure app</p>
-                </div>
-              </Link>
-            </div>
-          </section>
-
-          {/* Stats */}
-          <section className="mb-8">
-            <h2 className="text-sm font-medium text-tertiary uppercase tracking-wide mb-4">
-              Overview
-            </h2>
-            <div className="grid sm:grid-cols-4 gap-4">
-              {[
-                { label: 'Total Projects', value: '12', icon: 'fa-folder', color: 'brand' },
-                { label: 'Clips Created', value: '48', icon: 'fa-scissors', color: 'success' },
-                { label: 'Processing', value: '2', icon: 'fa-spinner', color: 'warning' },
-                { label: 'Storage Used', value: '2.4 GB', icon: 'fa-hard-drive', color: 'info' },
-              ].map((stat) => (
-                <div key={stat.label} className="card p-5">
-                  <div className="flex items-center justify-between mb-3">
-                    <span className="text-sm text-secondary">{stat.label}</span>
-                    <i className={`fa-solid ${stat.icon} text-${stat.color}-500`} aria-hidden="true" />
-                  </div>
-                  <div className="text-2xl font-semibold text-primary">{stat.value}</div>
-                </div>
-              ))}
-            </div>
-          </section>
-
-          {/* Recent Projects */}
-          <section>
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-sm font-medium text-tertiary uppercase tracking-wide">
-                Recent Projects
-              </h2>
-              <Link to="/library" className="text-sm text-brand-600 hover:underline">
-                View all
-              </Link>
-            </div>
-            <div className="card divide-y divide-primary">
-              {[
-                { title: 'Product Demo Video', status: 'completed', date: 'Dec 18' },
-                { title: 'Tutorial Series Ep.1', status: 'processing', date: 'Dec 17' },
-                { title: 'Marketing Campaign', status: 'completed', date: 'Dec 15' },
-              ].map((project, i) => (
-                <div key={i} className="p-4 flex items-center justify-between hover:bg-surface-secondary transition-colors cursor-pointer">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-surface-tertiary rounded-lg flex items-center justify-center">
-                      <i className="fa-solid fa-film text-tertiary" aria-hidden="true" />
-                    </div>
-                    <div>
-                      <h3 className="font-medium text-primary text-sm">{project.title}</h3>
-                      <p className="text-xs text-tertiary">{project.date}</p>
-                    </div>
-                  </div>
-                  <span className={`badge ${project.status === 'completed' ? 'badge-success' : 'badge-warning'}`}>
-                    {project.status}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </section>
-        </main>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
     </DashboardLayout>
   )
