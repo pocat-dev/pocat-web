@@ -1,0 +1,93 @@
+/* ============================================
+   DASHBOARD LAYOUT
+   ============================================ */
+
+.dashboard-layout {
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+  background-color: var(--surface-base);
+}
+
+.dashboard-sidebar {
+  width: 4.5rem;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--surface-primary);
+  border-right: 1px solid var(--border-primary);
+  flex-shrink: 0;
+}
+
+.dashboard-sidebar-logo {
+  padding: 1rem;
+  display: flex;
+  justify-content: center;
+}
+
+.dashboard-logo {
+  width: 2.5rem;
+  height: 2.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+  border-radius: 0.625rem;
+  color: white;
+  font-size: 0.875rem;
+}
+
+.dashboard-sidebar-nav {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.5rem;
+}
+
+.dashboard-sidebar-item {
+  width: 2.75rem;
+  height: 2.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary);
+  border-radius: 0.5rem;
+  text-decoration: none;
+  transition: all 0.15s;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.dashboard-sidebar-item:hover {
+  background-color: var(--surface-secondary);
+  color: var(--text-primary);
+}
+
+.dashboard-sidebar-item.active {
+  background-color: rgba(139, 92, 246, 0.15);
+  color: #a78bfa;
+}
+
+.dashboard-sidebar-footer {
+  padding: 1rem 0.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border-top: 1px solid var(--border-primary);
+}
+
+.dashboard-main {
+  flex: 1;
+  overflow-y: auto;
+  min-width: 0;
+}
+
+.dashboard-content {
+  padding: 2rem;
+  max-width: 1400px;
+  min-height: 100%;
+}
+

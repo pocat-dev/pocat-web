@@ -1,0 +1,422 @@
+/* =================================
+   EDITOR PAGE
+   ================================= */
+
+.editor-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background-color: var(--surface-base);
+}
+
+.editor-toolbar {
+  display: flex;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  background-color: var(--surface-primary);
+  border-bottom: 1px solid var(--border-primary);
+}
+
+.editor-url-input {
+  flex: 1;
+  padding: 0.625rem 1rem;
+  font-size: 0.875rem;
+  color: var(--text-primary);
+  background-color: var(--surface-secondary);
+  border: 1px solid var(--border-primary);
+  border-radius: 0.5rem;
+}
+
+.editor-url-input::placeholder {
+  color: var(--text-tertiary);
+}
+
+.editor-url-input:focus {
+  outline: none;
+  border-color: #8b5cf6;
+  background-color: var(--surface-tertiary);
+}
+
+.editor-analyze-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1.25rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: white;
+  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+  border: none;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.editor-analyze-btn:hover {
+  background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
+}
+
+.editor-main {
+  display: grid;
+  grid-template-columns: 280px 1fr 320px;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.editor-panel-left,
+.editor-panel-right {
+  background-color: var(--surface-primary);
+  border-right: 1px solid var(--border-primary);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.editor-panel-right {
+  border-right: none;
+  border-left: 1px solid var(--border-primary);
+}
+
+.editor-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  letter-spacing: 0.05em;
+  border-bottom: 1px solid var(--border-primary);
+}
+
+.editor-panel-btn {
+  width: 1.75rem;
+  height: 1.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  color: var(--text-tertiary);
+  border-radius: 0.375rem;
+  cursor: pointer;
+}
+
+.editor-panel-btn:hover {
+  background-color: var(--surface-secondary);
+  color: var(--text-primary);
+}
+
+.editor-clips-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0.5rem;
+}
+
+.editor-clip-item {
+  display: flex;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: all 0.15s;
+  border: 1px solid transparent;
+}
+
+.editor-clip-item:hover {
+  background-color: var(--surface-secondary);
+}
+
+.editor-clip-item.active {
+  background-color: var(--surface-secondary);
+  border-color: #8b5cf6;
+  box-shadow: 0 0 12px rgba(139, 92, 246, 0.3);
+}
+
+.editor-clip-thumb {
+  width: 4rem;
+  height: 2.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--surface-tertiary);
+  border-radius: 0.375rem;
+  color: var(--text-disabled);
+  font-size: 0.75rem;
+  flex-shrink: 0;
+}
+
+.editor-clip-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.editor-clip-title {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  margin-bottom: 0.25rem;
+}
+
+.editor-clip-score {
+  display: inline-block;
+  padding: 0.125rem 0.5rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: #4ade80;
+  background-color: rgba(34, 197, 94, 0.15);
+  border-radius: 9999px;
+}
+
+.editor-panel-center {
+  display: flex;
+  flex-direction: column;
+  background-color: var(--surface-base);
+  overflow: hidden;
+}
+
+.editor-video-wrapper {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+}
+
+.editor-video-player {
+  width: 100%;
+  max-width: 640px;
+  aspect-ratio: 16 / 9;
+  background-color: var(--surface-secondary);
+  border-radius: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.editor-video-play {
+  width: 5rem;
+  height: 5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+  border-radius: 50%;
+  color: white;
+  font-size: 1.5rem;
+  cursor: pointer;
+  box-shadow: 0 0 40px rgba(139, 92, 246, 0.5);
+  transition: transform 0.2s;
+}
+
+.editor-video-play:hover {
+  transform: scale(1.05);
+}
+
+.editor-video-play i {
+  margin-left: 0.25rem;
+}
+
+.editor-video-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1.5rem;
+  background-color: var(--surface-primary);
+  border-top: 1px solid var(--border-primary);
+}
+
+.editor-control-btn {
+  width: 2rem;
+  height: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  border-radius: 0.375rem;
+  cursor: pointer;
+}
+
+.editor-control-btn:hover {
+  background-color: var(--surface-secondary);
+  color: var(--text-primary);
+}
+
+.editor-time {
+  font-size: 0.75rem;
+  font-family: var(--font-mono);
+  color: var(--text-tertiary);
+  min-width: 4rem;
+}
+
+.editor-progress {
+  flex: 1;
+  height: 0.25rem;
+  background-color: var(--surface-tertiary);
+  border-radius: 9999px;
+  overflow: hidden;
+}
+
+.editor-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #8b5cf6 0%, #7c3aed 100%);
+  border-radius: 9999px;
+}
+
+.editor-properties {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1rem;
+}
+
+.editor-prop-group {
+  margin-bottom: 1.25rem;
+}
+
+.editor-prop-label {
+  display: block;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  margin-bottom: 0.5rem;
+}
+
+.editor-prop-input,
+.editor-prop-textarea,
+.editor-prop-select {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  color: var(--text-primary);
+  background-color: var(--surface-secondary);
+  border: 1px solid var(--border-primary);
+  border-radius: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.editor-prop-input::placeholder,
+.editor-prop-textarea::placeholder {
+  color: var(--text-tertiary);
+}
+
+.editor-prop-textarea {
+  resize: vertical;
+  min-height: 4rem;
+}
+
+.editor-prop-input:focus,
+.editor-prop-textarea:focus,
+.editor-prop-select:focus {
+  outline: none;
+  border-color: #8b5cf6;
+}
+
+.editor-prop-row {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.editor-prop-row .editor-prop-select {
+  flex: 1;
+  margin-bottom: 0;
+}
+
+.editor-color-picker {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.8125rem;
+  color: var(--text-secondary);
+}
+
+.editor-color-box {
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 0.25rem;
+  border: 1px solid var(--border-secondary);
+  cursor: pointer;
+}
+
+.editor-export-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.875rem;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: white;
+  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+  border: none;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  box-shadow: 0 4px 15px rgba(139, 92, 246, 0.4);
+}
+
+.editor-export-btn:hover {
+  background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
+}
+
+.editor-timeline {
+  background-color: var(--surface-primary);
+  border-top: 1px solid var(--border-primary);
+  padding: 0.75rem 1rem;
+}
+
+.editor-timeline-header,
+.editor-timeline-footer {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.6875rem;
+  font-family: var(--font-mono);
+  color: var(--text-tertiary);
+  padding: 0.25rem 0;
+}
+
+.editor-timeline-track {
+  position: relative;
+  height: 4rem;
+  background-color: var(--surface-secondary);
+  border-radius: 0.5rem;
+  overflow: hidden;
+}
+
+.editor-timeline-waveform {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, 
+    transparent 0%, 
+    rgba(139, 92, 246, 0.2) 30%,
+    rgba(139, 92, 246, 0.3) 50%,
+    rgba(139, 92, 246, 0.2) 70%,
+    transparent 100%
+  );
+}
+
+.editor-timeline-segments {
+  position: absolute;
+  inset: 0;
+}
+
+.editor-timeline-segment {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  background-color: rgba(139, 92, 246, 0.4);
+  border-left: 2px solid #8b5cf6;
+  border-right: 2px solid #8b5cf6;
+}
+
+.editor-timeline-playhead {
+  position: absolute;
+  top: 0;
+  width: 2px;
+  height: 100%;
+  background-color: white;
+  z-index: 10;
+}
