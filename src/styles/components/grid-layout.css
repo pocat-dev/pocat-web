@@ -1,0 +1,63 @@
+/* =================================
+   GRID LAYOUT COMPONENTS
+   ================================= */
+
+/* Responsive Grid */
+.grid-layout {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.grid-layout.cols-1 {
+  grid-template-columns: 1fr;
+}
+
+.grid-layout.cols-2 {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.grid-layout.cols-3 {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.grid-layout.cols-4 {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+/* Auto-fit grids */
+.grid-layout.auto-fit {
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+}
+
+.grid-layout.auto-fit.small {
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+}
+
+.grid-layout.auto-fit.large {
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+}
+
+/* Library specific (backward compatibility) */
+.library-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-4);
+}
+
+/* Responsive behavior */
+@media (max-width: 768px) {
+  .grid-layout.cols-3,
+  .grid-layout.cols-4,
+  .library-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .grid-layout.cols-2,
+  .grid-layout.cols-3,
+  .grid-layout.cols-4,
+  .library-grid {
+    grid-template-columns: 1fr;
+  }
+}
