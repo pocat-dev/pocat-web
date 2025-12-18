@@ -2,75 +2,73 @@ import React from 'react';
 import { Link, useRouterState } from '@tanstack/react-router';
 import { DarkModeToggle } from './DarkModeToggle';
 
+interface NavItem {
+  to: string;
+  icon: string;
+  label: string;
+}
+
+const navItems: NavItem[] = [
+  { to: '/editor', icon: 'fa-scissors', label: 'Editor' },
+  { to: '/library', icon: 'fa-folder-open', label: 'Library' },
+  { to: '/settings', icon: 'fa-gear', label: 'Settings' },
+];
+
 export const Sidebar: React.FC = () => {
-  const router = useRouterState()
-  const currentPath = router.location.pathname
+  const router = useRouterState();
+  const currentPath = router.location.pathname;
 
   return (
     <nav 
-      className="w-16 bg-surface border-r border-primary-200 flex flex-col items-center py-6 z-20"
+      className="w-[72px] bg-surface-secondary flex flex-col items-center py-4 border-r border-primary"
       role="navigation"
       aria-label="Main navigation"
     >
-      {/* Logo/Home Link */}
+      {/* Logo */}
       <Link 
         to="/"
-        className="text-brand-600 text-2xl font-bold cursor-pointer hover:text-brand-700 transition-colors focus-ring mb-8"
-        aria-label="ClipGenius AI Home"
+        className="w-10 h-10 flex items-center justify-center rounded-xl bg-brand-600 text-white mb-6 hover:bg-brand-700 transition-colors focus-ring"
+        aria-label="Pocat Home"
       >
-        <i className="fa-brands fa-google" aria-hidden="true"></i>
+        <i className="fa-solid fa-play text-sm" aria-hidden="true"></i>
       </Link>
       
-      {/* Navigation Links */}
-      <div className="flex flex-col space-y-2 flex-1">
-        <Link 
-          to="/editor"
-          className={`
-            w-12 h-12 flex items-center justify-center rounded-xl transition-all duration-200 focus-ring
-            ${currentPath === '/editor' 
-              ? 'text-brand-600 bg-brand-50 shadow-sm' 
-              : 'text-primary-500 hover:text-primary-700 hover:bg-primary-100'
-            }
-          `}
-          aria-label="Video Editor"
-          title="Video Editor"
-        >
-          <i className="fa-solid fa-scissors text-lg" aria-hidden="true"></i>
-        </Link>
-        
-        <Link 
-          to="/library"
-          className={`
-            w-12 h-12 flex items-center justify-center rounded-xl transition-all duration-200 focus-ring
-            ${currentPath === '/library' 
-              ? 'text-brand-600 bg-brand-50 shadow-sm' 
-              : 'text-primary-500 hover:text-primary-700 hover:bg-primary-100'
-            }
-          `}
-          aria-label="Project Library"
-          title="Project Library"
-        >
-          <i className="fa-solid fa-layer-group text-lg" aria-hidden="true"></i>
-        </Link>
-        
-        <Link 
-          to="/settings"
-          className={`
-            w-12 h-12 flex items-center justify-center rounded-xl transition-all duration-200 focus-ring
-            ${currentPath === '/settings' 
-              ? 'text-brand-600 bg-brand-50 shadow-sm' 
-              : 'text-primary-500 hover:text-primary-700 hover:bg-primary-100'
-            }
-          `}
-          aria-label="Settings"
-          title="Settings"
-        >
-          <i className="fa-solid fa-gear text-lg" aria-hidden="true"></i>
-        </Link>
+      {/* Navigation */}
+      <div className="flex flex-col gap-1 flex-1">
+        {navItems.map((item) => {
+          const isActive = currentPath === item.to;
+          return (
+            <Link 
+              key={item.to}
+              to={item.to}
+              className={`
+                group relative w-12 h-12 flex flex-col items-center justify-center rounded-xl
+                transition-all duration-150 focus-ring
+                ${isActive 
+                  ? 'bg-brand-100 text-brand-700 dark:bg-brand-900/30 dark:text-brand-400' 
+                  : 'text-tertiary hover:bg-surface-tertiary hover:text-primary'
+                }
+              `}
+              aria-label={item.label}
+              aria-current={isActive ? 'page' : undefined}
+            >
+              <i className={`fa-solid ${item.icon} text-lg`} aria-hidden="true"></i>
+              <span className="text-[10px] mt-0.5 font-medium">{item.label}</span>
+              
+              {/* Active indicator */}
+              {isActive && (
+                <span 
+                  className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-brand-600 rounded-r-full"
+                  aria-hidden="true"
+                />
+              )}
+            </Link>
+          );
+        })}
       </div>
 
-      {/* Dark Mode Toggle */}
-      <div className="mt-auto">
+      {/* Bottom Actions */}
+      <div className="flex flex-col gap-2 mt-auto pt-4 border-t border-primary w-full items-center">
         <DarkModeToggle />
       </div>
     </nav>

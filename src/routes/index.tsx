@@ -1,4 +1,4 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, Link } from '@tanstack/react-router'
 
 export const Route = createFileRoute('/')({
   component: HomePage,
@@ -6,115 +6,85 @@ export const Route = createFileRoute('/')({
 
 function HomePage() {
   return (
-    <div className="flex-1 flex items-center justify-center bg-surface min-h-screen">
-      <div className="text-center max-w-4xl mx-auto px-8 py-12">
-        {/* Hero Section */}
-        <header className="mb-12">
-          <h1 className="text-5xl font-bold mb-6 text-primary">
-            Welcome to{' '}
-            <span className="text-brand bg-gradient-to-r from-brand-500 to-brand-700 bg-clip-text text-transparent">
-              ClipGenius AI
-            </span>
+    <div className="flex-1 overflow-auto bg-surface">
+      <div className="max-w-5xl mx-auto px-6 py-16">
+        {/* Hero */}
+        <header className="text-center mb-16">
+          <h1 className="text-4xl sm:text-5xl font-bold text-primary tracking-tight mb-4">
+            AI Video Clipper
           </h1>
-          <p className="text-xl text-secondary leading-relaxed max-w-2xl mx-auto">
-            Transform long videos into engaging clips with AI-powered analysis. 
-            Create viral content for TikTok, Instagram, and YouTube with professional quality.
+          <p className="text-lg text-secondary max-w-xl mx-auto leading-relaxed">
+            Transform long videos into viral clips with AI-powered analysis. 
+            Perfect for TikTok, Instagram, and YouTube.
           </p>
+          
+          <div className="flex flex-col sm:flex-row gap-3 justify-center mt-8">
+            <Link to="/editor" className="btn btn-primary btn-lg">
+              <i className="fa-solid fa-play" aria-hidden="true" />
+              Start Creating
+            </Link>
+            <Link to="/library" className="btn btn-secondary btn-lg">
+              <i className="fa-solid fa-folder-open" aria-hidden="true" />
+              My Projects
+            </Link>
+          </div>
         </header>
-        
-        {/* CTA Buttons */}
-        <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-16">
-          <a 
-            href="/editor" 
-            className="btn-primary inline-flex items-center gap-3 text-lg px-8 py-4"
-            aria-describedby="editor-description"
-          >
-            <i className="fa-solid fa-scissors" aria-hidden="true"></i>
-            Start Creating
-          </a>
-          <a 
-            href="/library" 
-            className="btn-secondary inline-flex items-center gap-3 text-lg px-8 py-4"
-            aria-describedby="library-description"
-          >
-            <i className="fa-solid fa-folder" aria-hidden="true"></i>
-            Browse Projects
-          </a>
-        </div>
 
-        {/* Hidden descriptions for screen readers */}
-        <div className="sr-only">
-          <p id="editor-description">
-            Open the video editor to start creating clips from your videos
-          </p>
-          <p id="library-description">
-            View and manage your existing video projects
-          </p>
-        </div>
-
-        {/* Feature Cards */}
-        <section aria-labelledby="features-heading">
-          <h2 id="features-heading" className="sr-only">Key Features</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-left">
-            <article className="card p-8 hover:shadow-lg transition-all duration-300">
-              <div className="text-brand-600 text-3xl mb-4" aria-hidden="true">
-                <i className="fa-solid fa-robot"></i>
+        {/* Features */}
+        <section className="grid sm:grid-cols-3 gap-6 mb-16">
+          {[
+            {
+              icon: 'fa-wand-magic-sparkles',
+              title: 'AI Detection',
+              desc: 'Automatically find viral moments and engaging segments.',
+            },
+            {
+              icon: 'fa-bolt',
+              title: 'Fast Processing',
+              desc: 'Smart caching for efficient workflow and quick exports.',
+            },
+            {
+              icon: 'fa-crop',
+              title: 'Multi-Format',
+              desc: 'Export to 9:16, 16:9, and 1:1 for all platforms.',
+            },
+          ].map((feature) => (
+            <article key={feature.title} className="card p-6 text-center">
+              <div className="w-12 h-12 bg-brand-100 dark:bg-brand-900/30 rounded-xl flex items-center justify-center mx-auto mb-4">
+                <i className={`fa-solid ${feature.icon} text-xl text-brand-600 dark:text-brand-400`} aria-hidden="true" />
               </div>
-              <h3 className="text-xl font-semibold text-primary mb-3">
-                AI-Powered Analysis
-              </h3>
-              <p className="text-secondary leading-relaxed">
-                Automatically detect viral segments and engaging moments in your videos 
-                with advanced machine learning algorithms.
-              </p>
+              <h3 className="font-semibold text-primary mb-2">{feature.title}</h3>
+              <p className="text-sm text-secondary leading-relaxed">{feature.desc}</p>
             </article>
-            
-            <article className="card p-8 hover:shadow-lg transition-all duration-300">
-              <div className="text-brand-600 text-3xl mb-4" aria-hidden="true">
-                <i className="fa-solid fa-bolt"></i>
-              </div>
-              <h3 className="text-xl font-semibold text-primary mb-3">
-                Lightning Fast Processing
-              </h3>
-              <p className="text-secondary leading-relaxed">
-                Smart caching and real-time progress tracking ensure efficient workflow 
-                and minimal waiting time.
-              </p>
-            </article>
-            
-            <article className="card p-8 hover:shadow-lg transition-all duration-300">
-              <div className="text-brand-600 text-3xl mb-4" aria-hidden="true">
-                <i className="fa-solid fa-mobile-alt"></i>
-              </div>
-              <h3 className="text-xl font-semibold text-primary mb-3">
-                Multi-Platform Export
-              </h3>
-              <p className="text-secondary leading-relaxed">
-                Export to 9:16 (TikTok/Instagram), 16:9 (YouTube), and 1:1 (Square) 
-                aspect ratios for all social platforms.
-              </p>
-            </article>
-          </div>
+          ))}
         </section>
 
-        {/* Stats Section */}
-        <section className="mt-16 pt-12 border-t border-primary-200" aria-labelledby="stats-heading">
-          <h2 id="stats-heading" className="sr-only">Platform Statistics</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="text-center">
-              <div className="text-3xl font-bold text-brand-600 mb-2">50%</div>
-              <div className="text-secondary">Storage Savings</div>
+        {/* Stats */}
+        <section className="grid grid-cols-3 gap-6 py-8 border-t border-b border-primary">
+          {[
+            { value: '50%', label: 'Storage Saved' },
+            { value: '3x', label: 'Faster Export' },
+            { value: '99%', label: 'Uptime' },
+          ].map((stat) => (
+            <div key={stat.label} className="text-center">
+              <div className="text-2xl sm:text-3xl font-bold text-brand-600">{stat.value}</div>
+              <div className="text-sm text-tertiary mt-1">{stat.label}</div>
             </div>
-            <div className="text-center">
-              <div className="text-3xl font-bold text-brand-600 mb-2">3x</div>
-              <div className="text-secondary">Faster Processing</div>
-            </div>
-            <div className="text-center">
-              <div className="text-3xl font-bold text-brand-600 mb-2">99%</div>
-              <div className="text-secondary">Uptime Reliability</div>
-            </div>
-          </div>
+          ))}
         </section>
+
+        {/* Footer */}
+        <footer className="text-center mt-12 text-sm text-tertiary">
+          Built with ❤️ by{' '}
+          <a 
+            href="https://twitter.com/sandikodev" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="text-brand-600 hover:underline"
+          >
+            @sandikodev
+          </a>
+        </footer>
       </div>
     </div>
   )

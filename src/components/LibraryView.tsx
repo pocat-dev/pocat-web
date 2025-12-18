@@ -16,7 +16,7 @@ interface LibraryViewProps {
   projects: Project[];
   isLoadingProjects: boolean;
   onRefresh: () => void;
-  fileInputRef: React.RefObject<HTMLInputElement>;
+  fileInputRef: React.RefObject<HTMLInputElement | null>;
 }
 
 export const LibraryView: React.FC<LibraryViewProps> = ({
@@ -26,65 +26,62 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
   fileInputRef,
 }) => {
   const formatDuration = (seconds?: number) => {
-    if (!seconds) return 'Unknown';
+    if (!seconds) return '--:--';
     const minutes = Math.floor(seconds / 60);
     const remainingSeconds = seconds % 60;
     return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'completed':
-        return 'text-success-600 bg-success-50';
-      case 'processing':
-        return 'text-warning-600 bg-warning-50';
-      case 'downloading':
-        return 'text-info-600 bg-info-50';
-      case 'failed':
-        return 'text-error-600 bg-error-50';
-      default:
-        return 'text-secondary bg-surface-secondary';
-    }
+  const getStatusBadge = (status: string) => {
+    const styles: Record<string, string> = {
+      completed: 'badge-success',
+      processing: 'badge-warning',
+      downloading: 'badge-info',
+      failed: 'badge-error',
+    };
+    return styles[status] || 'badge-neutral';
   };
 
-  const handleFileUpload = () => {
-    fileInputRef.current?.click();
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+    });
   };
 
   return (
-    <div className="flex-1 bg-surface min-h-screen">
+    <div className="flex-1 bg-surface overflow-auto">
       {/* Header */}
-      <header className="bg-surface-secondary border-b border-primary-200 px-8 py-6">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-primary mb-2">Project Library</h1>
-            <p className="text-secondary">
-              Manage your video projects and clips
-            </p>
-          </div>
-          
-          <div className="flex items-center gap-4">
-            <button
-              onClick={onRefresh}
-              disabled={isLoadingProjects}
-              className="btn-secondary inline-flex items-center gap-2"
-              aria-label={isLoadingProjects ? 'Refreshing projects...' : 'Refresh project list'}
-            >
-              <i 
-                className={`fa-solid fa-refresh ${isLoadingProjects ? 'animate-spin' : ''}`} 
-                aria-hidden="true"
-              ></i>
-              {isLoadingProjects ? 'Refreshing...' : 'Refresh'}
-            </button>
+      <header className="sticky top-0 z-10 bg-surface/80 backdrop-blur-sm border-b border-primary">
+        <div className="max-w-6xl mx-auto px-6 py-5">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-2xl font-semibold text-primary tracking-tight">
+                Library
+              </h1>
+              <p className="text-sm text-secondary mt-1">
+                {projects.length} {projects.length === 1 ? 'project' : 'projects'}
+              </p>
+            </div>
             
-            <button
-              onClick={handleFileUpload}
-              className="btn-primary inline-flex items-center gap-2"
-              aria-label="Upload new video file"
-            >
-              <i className="fa-solid fa-plus" aria-hidden="true"></i>
-              New Project
-            </button>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={onRefresh}
+                disabled={isLoadingProjects}
+                className="btn btn-ghost btn-sm"
+                aria-label="Refresh"
+              >
+                <i className={`fa-solid fa-arrows-rotate ${isLoadingProjects ? 'animate-spin' : ''}`} aria-hidden="true" />
+              </button>
+              
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                className="btn btn-primary"
+              >
+                <i className="fa-solid fa-plus" aria-hidden="true" />
+                <span>New Project</span>
+              </button>
+            </div>
           </div>
         </div>
       </header>
@@ -95,153 +92,116 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
         ref={fileInputRef}
         accept="video/*"
         className="sr-only"
-        aria-label="Select video file to upload"
+        aria-label="Select video file"
       />
 
       {/* Content */}
-      <main className="max-w-7xl mx-auto px-8 py-8">
+      <main className="max-w-6xl mx-auto px-6 py-6">
         {isLoadingProjects ? (
-          <div className="flex items-center justify-center py-24" role="status" aria-live="polite">
+          /* Loading State */
+          <div className="flex items-center justify-center py-20" role="status">
             <div className="text-center">
-              <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-brand-200 border-t-brand-600 mb-4"></div>
-              <p className="text-secondary text-lg">Loading your projects...</p>
+              <div className="w-10 h-10 border-3 border-brand-200 border-t-brand-600 rounded-full animate-spin mx-auto" />
+              <p className="text-secondary text-sm mt-4">Loading projects...</p>
             </div>
           </div>
         ) : projects.length === 0 ? (
-          <div className="text-center py-24">
-            <div className="card max-w-md mx-auto p-12">
-              <div className="text-6xl text-secondary mb-6" aria-hidden="true">
-                <i className="fa-solid fa-folder-open"></i>
+          /* Empty State */
+          <div className="flex items-center justify-center py-20">
+            <div className="text-center max-w-sm">
+              <div className="w-16 h-16 bg-surface-tertiary rounded-2xl flex items-center justify-center mx-auto mb-5">
+                <i className="fa-solid fa-film text-2xl text-tertiary" aria-hidden="true" />
               </div>
-              <h2 className="text-2xl font-semibold text-primary mb-4">
-                No Projects Yet
+              <h2 className="text-lg font-semibold text-primary mb-2">
+                No projects yet
               </h2>
-              <p className="text-secondary mb-8 leading-relaxed">
-                Start creating amazing video clips by uploading your first video 
-                or importing from YouTube.
+              <p className="text-secondary text-sm mb-6 leading-relaxed">
+                Create your first project by uploading a video or importing from YouTube.
               </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <div className="flex flex-col sm:flex-row gap-3 justify-center">
                 <button
-                  onClick={handleFileUpload}
-                  className="btn-primary inline-flex items-center gap-2"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="btn btn-primary"
                 >
-                  <i className="fa-solid fa-upload" aria-hidden="true"></i>
+                  <i className="fa-solid fa-upload" aria-hidden="true" />
                   Upload Video
                 </button>
-                <a
-                  href="/editor"
-                  className="btn-secondary inline-flex items-center gap-2"
-                >
-                  <i className="fa-brands fa-youtube" aria-hidden="true"></i>
-                  Import from YouTube
+                <a href="/editor" className="btn btn-secondary">
+                  <i className="fa-brands fa-youtube" aria-hidden="true" />
+                  Import YouTube
                 </a>
               </div>
             </div>
           </div>
         ) : (
-          <div>
-            {/* Projects Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {projects.map((project) => (
-                <article
-                  key={project.id}
-                  className="card overflow-hidden group cursor-pointer"
-                  tabIndex={0}
-                  role="button"
-                  aria-label={`Open project: ${project.title}`}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                      e.preventDefault();
-                      // TODO: Navigate to project
-                      console.log('Open project:', project.id);
-                    }
-                  }}
-                >
-                  {/* Thumbnail */}
-                  <div className="relative aspect-video bg-surface-secondary overflow-hidden">
-                    {project.thumbnail ? (
-                      <img
-                        src={project.thumbnail}
-                        alt={`Thumbnail for ${project.title}`}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                        loading="lazy"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center">
-                        <i className="fa-solid fa-play-circle text-4xl text-secondary" aria-hidden="true"></i>
-                      </div>
-                    )}
-                    
-                    {/* Status Badge */}
-                    <div className="absolute top-3 right-3">
-                      <span
-                        className={`px-3 py-1 text-xs font-medium rounded-full ${getStatusColor(project.status)}`}
-                        aria-label={`Project status: ${project.status}`}
-                      >
-                        {project.status}
-                      </span>
+          /* Projects Grid */
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {projects.map((project) => (
+              <article
+                key={project.id}
+                className="card card-hover group cursor-pointer"
+                tabIndex={0}
+                role="button"
+                aria-label={`Open ${project.title}`}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    console.log('Open project:', project.id);
+                  }
+                }}
+              >
+                {/* Thumbnail */}
+                <div className="relative aspect-video bg-surface-tertiary overflow-hidden">
+                  {project.thumbnail ? (
+                    <img
+                      src={project.thumbnail}
+                      alt=""
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      loading="lazy"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center">
+                      <i className="fa-solid fa-play text-3xl text-disabled" aria-hidden="true" />
                     </div>
-
-                    {/* Duration Badge */}
-                    {project.duration && (
-                      <div className="absolute bottom-3 right-3">
-                        <span className="px-2 py-1 text-xs font-medium bg-black/70 text-white rounded">
-                          {formatDuration(project.duration)}
-                        </span>
-                      </div>
-                    )}
+                  )}
+                  
+                  {/* Duration */}
+                  {project.duration && (
+                    <span className="absolute bottom-2 right-2 px-1.5 py-0.5 text-xs font-medium bg-black/75 text-white rounded">
+                      {formatDuration(project.duration)}
+                    </span>
+                  )}
+                  
+                  {/* Play overlay */}
+                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">
+                    <div className="w-12 h-12 bg-white/90 rounded-full flex items-center justify-center">
+                      <i className="fa-solid fa-play text-brand-600 ml-1" aria-hidden="true" />
+                    </div>
                   </div>
+                </div>
 
-                  {/* Content */}
-                  <div className="p-6">
-                    <h3 className="font-semibold text-primary mb-2 line-clamp-2 group-hover:text-brand-600 transition-colors">
+                {/* Info */}
+                <div className="p-4">
+                  <div className="flex items-start justify-between gap-3">
+                    <h3 className="font-medium text-primary text-sm line-clamp-2 leading-snug flex-1">
                       {project.title}
                     </h3>
-                    
-                    <div className="flex items-center gap-4 text-sm text-secondary mb-3">
-                      <span className="flex items-center gap-1">
-                        <i className="fa-solid fa-calendar" aria-hidden="true"></i>
-                        {new Date(project.createdAt).toLocaleDateString()}
-                      </span>
-                      
-                      <span className="flex items-center gap-1">
-                        <i className={`fa-brands fa-${project.source === 'youtube' ? 'youtube' : 'file'}`} aria-hidden="true"></i>
-                        {project.source}
-                      </span>
-                    </div>
-
-                    <div className="flex items-center justify-between">
-                      <span className={`text-xs px-2 py-1 rounded ${project.videoAvailable ? 'text-success-600 bg-success-50' : 'text-warning-600 bg-warning-50'}`}>
-                        {project.videoAvailable ? 'Video Ready' : 'Processing'}
-                      </span>
-                      
-                      <button
-                        className="text-secondary hover:text-primary transition-colors p-1"
-                        aria-label={`More options for ${project.title}`}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          // TODO: Show context menu
-                        }}
-                      >
-                        <i className="fa-solid fa-ellipsis-vertical" aria-hidden="true"></i>
-                      </button>
-                    </div>
+                    <span className={`badge ${getStatusBadge(project.status)} shrink-0`}>
+                      {project.status}
+                    </span>
                   </div>
-                </article>
-              ))}
-            </div>
-
-            {/* Stats Footer */}
-            <footer className="mt-12 pt-8 border-t border-primary-200">
-              <div className="flex items-center justify-between text-sm text-secondary">
-                <span>
-                  {projects.length} project{projects.length !== 1 ? 's' : ''} total
-                </span>
-                <span>
-                  Last updated: {new Date().toLocaleString()}
-                </span>
-              </div>
-            </footer>
+                  
+                  <div className="flex items-center gap-3 mt-3 text-xs text-tertiary">
+                    <span className="flex items-center gap-1">
+                      <i className={`fa-${project.source === 'youtube' ? 'brands fa-youtube' : 'solid fa-file-video'}`} aria-hidden="true" />
+                      {project.source === 'youtube' ? 'YouTube' : 'Upload'}
+                    </span>
+                    <span>•</span>
+                    <span>{formatDate(project.createdAt)}</span>
+                  </div>
+                </div>
+              </article>
+            ))}
           </div>
         )}
       </main>
