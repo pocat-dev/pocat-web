@@ -14,7 +14,9 @@
 @import './styles/components/buttons.css';
 @import './styles/components/cards.css';
 @import './styles/components/badges.css';
-@import './styles/components/tables.css';
+@import './styles/components/data-display.css';
+@import './styles/components/media.css';
+@import './styles/components/feedback.css';
 @import './styles/components/forms.css';
 
 /* Pages */
@@ -26,4 +28,4 @@
 @import './styles/pages/editor.css';
 
 /* Layouts */
-@import './styles/layouts/dashboard.css';
+@import './styles/layouts/app-shell.css';
