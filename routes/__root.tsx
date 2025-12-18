@@ -1,6 +1,8 @@
+/// <reference types="vite/client" />
 import { createRootRoute, Outlet } from '@tanstack/react-router'
 import { TanStackRouterDevtools } from '@tanstack/router-devtools'
 import { Sidebar } from '../components/Sidebar'
+import { ThemeProvider } from '../contexts/ThemeContext'
 import appCss from '../src/styles.css?url'
 
 export const Route = createRootRoute({
@@ -8,16 +10,18 @@ export const Route = createRootRoute({
     links: [{ rel: 'stylesheet', href: appCss }],
   }),
   component: () => (
-    <div className="h-screen bg-slate-950 text-white flex">
-      <Sidebar />
-      
-      <div className="flex-1 flex flex-col">
-        <Outlet />
+    <ThemeProvider>
+      <div className="h-screen bg-surface text-primary flex">
+        <Sidebar />
+        
+        <main className="flex-1 flex flex-col min-w-0" role="main">
+          <Outlet />
+        </main>
+        
+        {process.env.NODE_ENV === 'development' && (
+          <TanStackRouterDevtools />
+        )}
       </div>
-      
-      {process.env.NODE_ENV === 'development' && (
-        <TanStackRouterDevtools />
-      )}
-    </div>
+    </ThemeProvider>
   ),
 })
