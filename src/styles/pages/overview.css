@@ -1,5 +1,5 @@
 /* ============================================
-   OVERVIEW PAGE
+   OVERVIEW PAGE - CONTENT ONLY
    ============================================ */
 
 .loading-screen {
@@ -17,11 +17,6 @@
   border-top-color: #8b5cf6;
   border-radius: 50%;
   animation: spin 1s linear infinite;
-}
-
-.dashboard-content {
-  padding: 2rem;
-  max-width: 1400px;
 }
 
 .dashboard-title {

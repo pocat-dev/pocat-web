@@ -68,14 +68,6 @@
   font-size: var(--text-sm);
 }
 
-.form-label {
-  display: block;
-  font-size: var(--text-sm);
-  font-weight: var(--font-medium);
-  color: #374151;
-  margin-bottom: var(--space-1-5);
-}
-
 .form-input {
   width: 100%;
   padding: var(--space-3) var(--space-4);
@@ -101,14 +93,7 @@
   box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.15);
 }
 
-.input-group {
-  position: relative;
-}
-
-.input-group .form-input {
-  padding-right: var(--space-10);
-}
-
+/* Signin-specific styles only */
 .input-toggle {
   position: absolute;
   right: var(--space-3);
