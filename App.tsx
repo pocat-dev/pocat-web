@@ -46,7 +46,6 @@ export default function App() {
     { id: 2, title: "Product Launch Event", edited: "1 day ago", duration: "45:10", clips: 12, ratio: "9:16" },
     { id: 3, title: "Gaming Stream Highlights", edited: "3 days ago", duration: "08:15", clips: 3, ratio: "16:9" }
   ]);
-  const [projectToDelete, setProjectToDelete] = useState<number | null>(null);
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -109,7 +108,16 @@ export default function App() {
             try {
                 const statusRes = await getProjectDownloadStatus(backendUrl, projectId);
                 
-                if (statusRes.success && statusRes.data.readyForEditing) {
+                // DEFENSIVE: Ensure statusRes.data exists
+                if (!statusRes || !statusRes.data) {
+                    console.warn("Polling returned empty data");
+                    return;
+                }
+
+                // FIX: Remove '= {}' default value which was causing TypeScript to infer 'video' as an empty object type.
+                const { readyForEditing, status = 'unknown', progress = 0, video } = statusRes.data;
+
+                if (statusRes.success && readyForEditing) {
                     clearInterval(pollInterval);
                     setImportStatus('');
                     setIsImporting(false);
@@ -124,14 +132,18 @@ export default function App() {
                         isPlaying: true
                     }));
                     
-                    const sourceText = statusRes.data.video?.source === 'cached' ? " (Instant Access from Cache)" : "";
+                    // FIX: video is correctly typed now, source property is accessible.
+                    const sourceText = video?.source === 'cached' ? " (Instant Access from Cache)" : "";
                     alert(`✅ Video Ready${sourceText}! You can now start clipping.`);
                     
                 } else if (statusRes.success) {
-                     const { progress, status, video } = statusRes.data;
+                     // FIX: video is correctly typed now, source property is accessible.
                      const videoSource = video?.source || 'unknown';
                      const sourceLabel = videoSource === 'shared' ? ' [Shared DL]' : '';
-                     setImportStatus(`${status.toUpperCase()}${sourceLabel}: ${progress}%`);
+                     
+                     // FIX: Use safe status string for toUpperCase()
+                     const displayStatus = (status || 'processing').toString().toUpperCase();
+                     setImportStatus(`${displayStatus}${sourceLabel}: ${progress}%`);
                      
                      if (status === 'failed') {
                          clearInterval(pollInterval);
@@ -142,6 +154,7 @@ export default function App() {
                 }
             } catch (e) {
                 console.warn("Polling error:", e);
+                // Safety: if error persists, you might want to stop the interval
             }
         }, 3000);
 

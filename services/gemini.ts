@@ -1,5 +1,5 @@
 
-import { GoogleGenAI, Type, Schema } from "@google/genai";
+import { GoogleGenAI, Type } from "@google/genai";
 import { AIAnalysisResult, ViralClip } from "../types";
 
 // Helper to convert blob to base64
@@ -34,7 +34,8 @@ export const analyzeFrame = async (imageBlob: Blob, contextText: string): Promis
     const ai = getAIClient();
     const base64Data = await blobToBase64(imageBlob);
 
-    const schema: Schema = {
+    // Define schema using Type from @google/genai
+    const schema = {
       type: Type.OBJECT,
       properties: {
         title: { type: Type.STRING, description: "A catchy, viral-style title for this video clip" },
@@ -51,7 +52,8 @@ export const analyzeFrame = async (imageBlob: Blob, contextText: string): Promis
     };
 
     const response = await ai.models.generateContent({
-      model: "gemini-2.5-flash",
+      // FIX: Use gemini-3-flash-preview for general text and multimodal tasks as per guidelines
+      model: "gemini-3-flash-preview",
       contents: {
         parts: [
           {
@@ -111,9 +113,7 @@ export const analyzeVideoSegments = async (
              For each clip, estimate a start and end time based on the timestamps provided, give it a viral score, and a title.`
     }];
 
-    // Limit frames to avoid hitting payload size limits (Gemini has input limits)
-    // Sending too many high-res images can cause 413 or 400 errors.
-    // We'll take a max of 15 frames for safety.
+    // Limit frames to avoid hitting payload size limits
     const maxFrames = 15;
     const stride = Math.ceil(frames.length / maxFrames);
     const selectedFrames = frames.filter((_, i) => i % stride === 0).slice(0, maxFrames);
@@ -129,7 +129,7 @@ export const analyzeVideoSegments = async (
       });
     }
 
-    const schema: Schema = {
+    const schema = {
       type: Type.ARRAY,
       items: {
         type: Type.OBJECT,
@@ -147,7 +147,8 @@ export const analyzeVideoSegments = async (
     };
 
     const response = await ai.models.generateContent({
-      model: "gemini-2.5-flash",
+      // FIX: Use gemini-3-flash-preview for general tasks as per guidelines
+      model: "gemini-3-flash-preview",
       contents: { parts },
       config: {
         responseMimeType: "application/json",
