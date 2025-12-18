@@ -1,15 +1,16 @@
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { useAuth } from '../contexts/AuthContext'
-import { useEffect } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import { Button } from '../components/ui'
 
 export const Route = createFileRoute('/')({
   component: LandingPage,
 })
 
 const features = [
-  { icon: 'fa-wand-magic-sparkles', title: 'AI Detection', desc: 'Smart algorithms identify key moments and high-impact scenes with precision.' },
-  { icon: 'fa-bolt', title: 'Fast Processing', desc: 'Process hours of footage into shareable content in seconds.' },
-  { icon: 'fa-crop', title: 'Multi-Format Export', desc: 'Automatically resize for every platform—vertical, square, or landscape.' },
+  { icon: 'fa-wand-magic-sparkles', title: 'AI Detection', desc: 'Smart algorithms identify key moments, engaging dialogue, and high-impact scenes with precision.' },
+  { icon: 'fa-bolt', title: 'Fast Processing', desc: 'Clip videos at lightning speed. Process hours of footage into shareable content in seconds.' },
+  { icon: 'fa-crop', title: 'Multi-Format Export', desc: 'Automatically resize and reformat clips for every platform—vertical, square, or landscape.' },
 ]
 
 const stats = [
@@ -18,117 +19,169 @@ const stats = [
   { value: '3X', label: 'Faster Creation', icon: 'fa-rocket' },
 ]
 
+const steps = [
+  { num: '01', title: 'Import Video', desc: 'Paste a YouTube URL or upload your video file directly.' },
+  { num: '02', title: 'AI Analysis', desc: 'Our AI scans for viral moments, hooks, and engaging segments.' },
+  { num: '03', title: 'Export Clips', desc: 'Download optimized clips ready for TikTok, Shorts, and Reels.' },
+]
+
+const planets = [
+  { id: 'tiktok', icon: 'fa-tiktok', color: '#000000', orbit: 140, speed: 1.0, startAngle: 0 },
+  { id: 'shorts', icon: 'fa-youtube', color: '#FF0000', orbit: 160, speed: 0.8, startAngle: 60, badge: 'S' },
+  { id: 'facebook', icon: 'fa-facebook-f', color: '#1877F2', orbit: 130, speed: 1.2, startAngle: 120 },
+  { id: 'instagram', icon: 'fa-instagram', color: '#E4405F', orbit: 150, speed: 0.9, startAngle: 180 },
+  { id: 'threads', icon: 'fa-threads', color: '#000000', orbit: 135, speed: 1.1, startAngle: 240 },
+  { id: 'youtube', icon: 'fa-youtube', color: '#FF0000', orbit: 170, speed: 0.7, startAngle: 300 },
+]
+
 function LandingPage() {
   const { isAuthenticated, isLoading } = useAuth()
   const navigate = useNavigate()
+  const [sliderValue, setSliderValue] = useState(30)
+  const [baseRotation, setBaseRotation] = useState(0)
+  const animationRef = useRef<number>()
 
   useEffect(() => {
-    if (!isLoading && isAuthenticated) {
-      navigate({ to: '/dashboard' })
-    }
+    if (!isLoading && isAuthenticated) navigate({ to: '/dashboard' })
   }, [isAuthenticated, isLoading, navigate])
 
-  if (isLoading) {
-    return (
-      <div className="h-screen flex items-center justify-center bg-base">
-        <div className="w-8 h-8 border-2 border-violet-500/30 border-t-violet-500 rounded-full animate-spin" />
-      </div>
-    )
-  }
+  useEffect(() => {
+    let lastTime = performance.now()
+    const animate = (time: number) => {
+      const delta = (time - lastTime) / 1000
+      lastTime = time
+      setBaseRotation(prev => (prev + delta * 20) % 360)
+      animationRef.current = requestAnimationFrame(animate)
+    }
+    animationRef.current = requestAnimationFrame(animate)
+    return () => { if (animationRef.current) cancelAnimationFrame(animationRef.current) }
+  }, [])
 
+  if (isLoading) return <div className="loading-screen"><div className="loading-spinner" /></div>
   if (isAuthenticated) return null
 
+  const sliderOffset = (sliderValue - 50) * 2
+
   return (
-    <div className="min-h-screen bg-gradient-hero">
+    <div className="landing-page">
       {/* Header */}
-      <header className="header border-b-0 bg-transparent">
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 bg-gradient-to-br from-violet-500 to-violet-700 rounded-lg flex items-center justify-center">
-            <i className="fa-solid fa-play text-white text-sm" aria-hidden="true" />
+      <header className="landing-header">
+        <div className="landing-container">
+          <div className="landing-logo">
+            <div className="landing-logo-icon"><i className="fa-solid fa-play" /></div>
+            <span>Pocat</span>
           </div>
-          <span className="font-semibold text-lg text-primary">Pocat</span>
+          <nav className="landing-nav">
+            <a href="#features">Features</a>
+            <a href="#how-it-works">How It Works</a>
+            <a href="#pricing">Pricing</a>
+          </nav>
+          <Link to="/login"><Button variant="primary" size="sm">Sign In</Button></Link>
         </div>
-        <nav className="header-nav">
-          <a href="#features" className="header-nav-item">Features</a>
-          <a href="#pricing" className="header-nav-item">Pricing</a>
-          <a href="#resources" className="header-nav-item">Resources</a>
-          <Link to="/login" className="btn btn-secondary btn-sm">Sign In</Link>
-        </nav>
       </header>
 
       {/* Hero */}
-      <section className="hero">
-        <div className="container">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <div className="hero-content">
-              <h1 className="hero-title">
-                Transform Videos<br />into Viral Clips
-              </h1>
-              <p className="hero-subtitle">
-                Effortlessly extract and optimize video highlights with our advanced AI. 
-                Boost engagement across all platforms in minutes.
-              </p>
-              <div className="hero-actions">
-                <Link to="/login" className="btn btn-primary btn-lg">
+      <section className="landing-hero">
+        <div className="landing-container landing-hero-grid">
+          <div className="landing-hero-content">
+            <h1>Transform Videos into Viral Clips</h1>
+            <p>Effortlessly extract and optimize video highlights with our advanced AI. Boost engagement across all platforms in minutes.</p>
+            <div className="landing-hero-actions">
+              <Link to="/login">
+                <Button variant="primary" size="lg" rightIcon={<i className="fa-solid fa-arrow-up-right" />}>
                   Get Started Free
-                  <i className="fa-solid fa-arrow-right" aria-hidden="true" />
-                </Link>
-                <button className="btn btn-secondary btn-lg">
-                  <i className="fa-solid fa-play" aria-hidden="true" />
-                  Watch Demo
-                </button>
-              </div>
+                </Button>
+              </Link>
+              <Button variant="outline" size="lg" leftIcon={<i className="fa-solid fa-play" />}>
+                Watch Demo
+              </Button>
             </div>
-
-            {/* Hero Visual */}
-            <div className="relative hidden lg:block">
-              <div className="card-glass p-6 rounded-2xl">
-                <div className="aspect-video bg-surface-base rounded-xl flex items-center justify-center mb-4">
-                  <div className="w-16 h-16 bg-gradient-to-br from-violet-500 to-violet-700 rounded-full flex items-center justify-center glow-violet-lg">
-                    <i className="fa-solid fa-play text-white text-2xl ml-1" aria-hidden="true" />
+          </div>
+          
+          {/* Planetary Phone Mockup */}
+          <div className="landing-hero-visual">
+            <div className="planetary-system">
+              {planets.map((planet) => {
+                const angle = planet.startAngle + baseRotation * planet.speed + sliderOffset * planet.speed * 0.5
+                const rad = (angle * Math.PI) / 180
+                const z = Math.cos(rad)
+                const isFront = z > 0
+                
+                return (
+                  <div
+                    key={planet.id}
+                    className={`planet ${isFront ? 'front' : 'back'}`}
+                    style={{
+                      '--orbit': `${planet.orbit}px`,
+                      '--angle': `${angle}deg`,
+                      '--z': z,
+                      '--color': planet.color,
+                    } as React.CSSProperties}
+                  >
+                    <i className={`fa-brands ${planet.icon}`} />
+                    {planet.badge && <span className="planet-badge">{planet.badge}</span>}
+                  </div>
+                )
+              })}
+              
+              <div className="phone-mockup">
+                <div className="phone-notch" />
+                <div className="phone-screen">
+                  <div className="phone-video">
+                    <div className="phone-play"><i className="fa-solid fa-play" /></div>
+                  </div>
+                  <div className="phone-controls">
+                    <span className="phone-time">0:{sliderValue.toString().padStart(2, '0')}</span>
+                    <input
+                      type="range"
+                      min="0"
+                      max="100"
+                      value={sliderValue}
+                      onChange={(e) => setSliderValue(Number(e.target.value))}
+                      className="phone-slider"
+                    />
+                    <span className="phone-time">1:30</span>
                   </div>
                 </div>
-                <div className="h-12 bg-surface-secondary rounded-lg flex items-center gap-2 px-4">
-                  <div className="flex-1 h-6 bg-violet-500/30 rounded" />
-                  <div className="w-20 h-6 bg-violet-500/50 rounded" />
-                  <div className="flex-1 h-6 bg-violet-500/30 rounded" />
-                </div>
               </div>
+              
+              <div className="planetary-glow" />
             </div>
           </div>
         </div>
       </section>
 
       {/* Stats */}
-      <section className="py-12 border-y border-primary">
-        <div className="container">
-          <div className="grid grid-cols-3 gap-8">
-            {stats.map((stat) => (
-              <div key={stat.label} className="text-center">
-                <div className="flex items-center justify-center gap-3 mb-2">
-                  <span className="text-4xl font-bold text-primary">{stat.value}</span>
-                  <i className={`fa-solid ${stat.icon} text-2xl text-violet-500`} aria-hidden="true" />
-                </div>
-                <div className="text-sm text-secondary">{stat.label}</div>
+      <section className="landing-stats">
+        <div className="landing-container landing-stats-grid">
+          {stats.map((stat) => (
+            <div key={stat.label} className="landing-stat">
+              <div className="landing-stat-value">
+                {stat.value} <i className={`fa-solid ${stat.icon}`} />
               </div>
-            ))}
-          </div>
+              <div className="landing-stat-label">{stat.label}</div>
+            </div>
+          ))}
         </div>
       </section>
 
       {/* Features */}
-      <section id="features" className="section">
-        <div className="container">
-          <div className="grid md:grid-cols-3 gap-6">
+      <section id="features" className="landing-features">
+        <div className="landing-container">
+          <div className="landing-section-header">
+            <h2>Powerful Features</h2>
+            <p>Everything you need to create viral content at scale</p>
+          </div>
+          <div className="landing-features-grid">
             {features.map((feature) => (
-              <div key={feature.title} className="card card-hover p-6">
-                <div className="stat-card-icon mb-4">
-                  <i className={`fa-solid ${feature.icon}`} aria-hidden="true" />
+              <div key={feature.title} className="landing-feature-card">
+                <div className="landing-feature-icon">
+                  <i className={`fa-solid ${feature.icon}`} />
                 </div>
-                <h3 className="font-semibold text-primary mb-2">{feature.title}</h3>
-                <p className="text-sm text-secondary leading-relaxed mb-4">{feature.desc}</p>
-                <a href="#" className="text-sm text-brand-400 hover:text-brand-300 inline-flex items-center gap-1">
-                  Learn More <i className="fa-solid fa-arrow-right text-xs" />
+                <h3>{feature.title}</h3>
+                <p>{feature.desc}</p>
+                <a href="#" className="landing-feature-link">
+                  Learn More <i className="fa-solid fa-arrow-right" />
                 </a>
               </div>
             ))}
@@ -136,31 +189,78 @@ function LandingPage() {
         </div>
       </section>
 
+      {/* How It Works */}
+      <section id="how-it-works" className="landing-steps">
+        <div className="landing-container">
+          <div className="landing-section-header">
+            <h2>How It Works</h2>
+            <p>Three simple steps to viral content</p>
+          </div>
+          <div className="landing-steps-grid">
+            {steps.map((step, i) => (
+              <div key={step.num} className="landing-step">
+                <div className="landing-step-num">{step.num}</div>
+                <h3>{step.title}</h3>
+                <p>{step.desc}</p>
+                {i < steps.length - 1 && <div className="landing-step-arrow"><i className="fa-solid fa-arrow-right" /></div>}
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* CTA */}
-      <section className="section bg-surface-primary">
-        <div className="container text-center">
-          <h2 className="text-3xl font-bold text-primary mb-4">
-            Ready to Amplify Your Video Content?
-          </h2>
-          <p className="text-secondary mb-8 max-w-xl mx-auto">
-            Join thousands of creators and marketers using Pocat to dominate social media.
-          </p>
-          <Link to="/login" className="btn btn-primary btn-lg">
-            Start Clipping for Free
+      <section className="landing-cta">
+        <div className="landing-container landing-cta-content">
+          <div className="landing-cta-badge">
+            <i className="fa-solid fa-sparkles" /> Limited Time Offer
+          </div>
+          <h2>Ready to Amplify Your Video Content?</h2>
+          <p>Join thousands of creators and marketers using Pocat to dominate social media.</p>
+          <Link to="/login">
+            <Button variant="primary" size="lg">Start Clipping for Free</Button>
           </Link>
+          <div className="landing-cta-note">No credit card required • Free forever plan available</div>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="py-8 border-t border-primary">
-        <div className="container">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-            <p className="text-sm text-tertiary">© 2024 Pocat. All rights reserved.</p>
-            <div className="flex gap-4">
-              <a href="#" className="text-tertiary hover:text-secondary"><i className="fa-brands fa-twitter" /></a>
-              <a href="#" className="text-tertiary hover:text-secondary"><i className="fa-brands fa-linkedin" /></a>
-              <a href="#" className="text-tertiary hover:text-secondary"><i className="fa-brands fa-github" /></a>
+      <footer className="landing-footer">
+        <div className="landing-container landing-footer-grid">
+          <div className="landing-footer-brand">
+            <div className="landing-logo">
+              <div className="landing-logo-icon"><i className="fa-solid fa-play" /></div>
+              <span>Pocat</span>
             </div>
+            <p>AI-powered video clipping for creators and marketers.</p>
+          </div>
+          <div className="landing-footer-cols">
+            <div>
+              <h4>Product</h4>
+              <a href="#">Features</a>
+              <a href="#">Pricing</a>
+              <a href="#">Changelog</a>
+            </div>
+            <div>
+              <h4>Company</h4>
+              <a href="#">About</a>
+              <a href="#">Blog</a>
+              <a href="#">Careers</a>
+            </div>
+            <div>
+              <h4>Legal</h4>
+              <a href="#">Privacy</a>
+              <a href="#">Terms</a>
+              <a href="#">Contact</a>
+            </div>
+          </div>
+        </div>
+        <div className="landing-container landing-footer-bottom">
+          <p>© 2025 Pocat. All rights reserved.</p>
+          <div className="landing-footer-social">
+            <a href="#"><i className="fa-brands fa-twitter" /></a>
+            <a href="#"><i className="fa-brands fa-linkedin" /></a>
+            <a href="#"><i className="fa-brands fa-github" /></a>
           </div>
         </div>
       </footer>

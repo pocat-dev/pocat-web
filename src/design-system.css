@@ -2914,3 +2914,6 @@ body {
   background-color: white;
   z-index: 10;
 }
+
+/* Landing Page - imported from modular file */
+@import './styles/pages/landing.css';
