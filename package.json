@@ -10,10 +10,13 @@
   },
   "dependencies": {
     "@google/genai": "^1.33.0",
+    "@tanstack/react-router": "^1.141.6",
+    "@tanstack/router-devtools": "^1.141.6",
     "react": "^19.2.3",
     "react-dom": "^19.2.3"
   },
   "devDependencies": {
+    "@tanstack/router-cli": "^1.141.7",
     "@types/node": "^22.14.0",
     "@vitejs/plugin-react": "^5.0.0",
     "typescript": "~5.8.2",
