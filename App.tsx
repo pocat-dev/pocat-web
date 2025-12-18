@@ -124,12 +124,13 @@ export default function App() {
                         isPlaying: true
                     }));
                     
-                    const sourceText = statusRes.data.video.source === 'cached' ? " (Instant Access from Cache)" : "";
+                    const sourceText = statusRes.data.video?.source === 'cached' ? " (Instant Access from Cache)" : "";
                     alert(`✅ Video Ready${sourceText}! You can now start clipping.`);
                     
                 } else if (statusRes.success) {
                      const { progress, status, video } = statusRes.data;
-                     const sourceLabel = video.source === 'shared' ? ' [Shared DL]' : '';
+                     const videoSource = video?.source || 'unknown';
+                     const sourceLabel = videoSource === 'shared' ? ' [Shared DL]' : '';
                      setImportStatus(`${status.toUpperCase()}${sourceLabel}: ${progress}%`);
                      
                      if (status === 'failed') {
