@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useAuth } from '../contexts/AuthContext'
 
 export const Route = createFileRoute('/login')({
@@ -15,10 +15,13 @@ function LoginPage() {
   const { login, isAuthenticated } = useAuth()
   const navigate = useNavigate()
 
-  if (isAuthenticated) {
-    navigate({ to: '/dashboard' })
-    return null
-  }
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate({ to: '/dashboard' })
+    }
+  }, [isAuthenticated, navigate])
+
+  if (isAuthenticated) return null
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
