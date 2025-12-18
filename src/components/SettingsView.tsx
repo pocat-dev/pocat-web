@@ -95,7 +95,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
   const [autoSave, setAutoSave] = useState(true)
 
   return (
-    <div className="dashboard-content">
+    <div className="app-content">
       <h1 className="dashboard-title">Settings</h1>
 
       <div className="settings-layout">

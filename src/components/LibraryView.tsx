@@ -29,7 +29,7 @@ const formatDate = (dateString: string) =>
 
 export const LibraryView: React.FC<LibraryViewProps> = ({ projects, isLoadingProjects, onRefresh, fileInputRef }) => {
   return (
-    <div className="dashboard-content">
+    <div className="app-content">
       <div className="library-header">
         <div>
           <h1 className="dashboard-title" style={{ marginBottom: 0 }}>Library</h1>

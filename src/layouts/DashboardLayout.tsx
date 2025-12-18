@@ -18,23 +18,23 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
   const location = useLocation()
 
   return (
-    <div className="dashboard-layout">
+    <div className="app-layout">
       {/* Sidebar */}
-      <aside className="dashboard-sidebar">
+      <aside className="app-sidebar">
         {/* Logo */}
-        <div className="dashboard-sidebar-logo">
-          <div className="dashboard-logo">
+        <div className="app-sidebar-header">
+          <div className="app-logo">
             <i className="fa-solid fa-play" aria-hidden="true" />
           </div>
         </div>
 
         {/* Navigation */}
-        <nav className="dashboard-sidebar-nav">
+        <nav className="app-nav">
           {navItems.map((item) => (
             <Link
               key={item.to}
               to={item.to}
-              className={`dashboard-sidebar-item ${location.pathname === item.to ? 'active' : ''}`}
+              className={`app-nav-item ${location.pathname === item.to ? 'active' : ''}`}
               title={item.label}
             >
               <i className={`fa-solid ${item.icon}`} aria-hidden="true" />
@@ -43,15 +43,15 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
         </nav>
 
         {/* Footer */}
-        <div className="dashboard-sidebar-footer">
-          <button onClick={logout} className="dashboard-sidebar-item" title="Logout">
+        <div className="app-sidebar-footer">
+          <button onClick={logout} className="app-nav-item" title="Logout">
             <i className="fa-solid fa-right-from-bracket" aria-hidden="true" />
           </button>
         </div>
       </aside>
 
       {/* Main Content */}
-      <main className="dashboard-main">
+      <main className="app-main">
         {children}
       </main>
     </div>

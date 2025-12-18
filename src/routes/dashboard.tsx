@@ -33,7 +33,7 @@ function DashboardPage() {
 
   return (
     <DashboardLayout>
-      <div className="dashboard-content">
+      <div className="app-content">
         <h1 className="dashboard-title">Welcome, {user?.username}</h1>
 
         {/* Quick Actions */}
