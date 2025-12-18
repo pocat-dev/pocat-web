@@ -173,12 +173,19 @@ Tidak perlu konfigurasi tambahan. Vite secara otomatis:
 ## ✅ Current Status
 
 - [x] Plan documented
-- [x] Phase 1: Landing page extraction (`styles/pages/landing.css` - 605 lines)
-- [ ] Phase 2: Base styles extraction
+- [x] Phase 1: Landing page extraction (`styles/pages/landing.css` - 670 lines)
+- [x] Phase 2: Base tokens extraction (`styles/base/tokens.css` - 232 lines)
 - [ ] Phase 3: Components extraction
 - [ ] Phase 4: Layouts extraction
 - [ ] Phase 5: Pages & utilities extraction
 - [ ] Phase 6: Cleanup & verification
+
+### File Size Progress
+| File | Lines | Status |
+|------|-------|--------|
+| `design-system.css` | 2709 (from ~3500) | ⬇️ Reduced |
+| `styles/base/tokens.css` | 232 | ✅ Extracted |
+| `styles/pages/landing.css` | 670 | ✅ Extracted |
 
 ---
 
