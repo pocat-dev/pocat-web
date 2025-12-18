@@ -3,29 +3,32 @@ export interface BackendResponse<T = any> {
   success: boolean;
   message: string;
   data: T;
-  error?: string; // Add optional error field for failure cases
+  error?: string;
 }
 
 export interface VideoInfo {
   duration: number | string;
   thumbnail: string;
-  title?: string;
+  title: string;
 }
 
 export interface CreateProjectResponse extends BackendResponse {
   data: {
     projectId: number;
+    status: 'pending' | 'downloading' | 'processing' | 'completed' | 'failed';
     videoInfo: VideoInfo;
-    estimatedTime: string;
+    estimatedTime?: string;
   }
 }
 
 export interface ProjectStatusResponse extends BackendResponse {
   data: {
     readyForEditing: boolean;
-    downloaded?: boolean;
-    progress?: number;
-    status?: 'pending' | 'downloading' | 'processing' | 'completed' | 'failed';
+    status: 'pending' | 'downloading' | 'processing' | 'completed' | 'failed';
+    progress: number;
+    video: {
+      source: 'fresh' | 'shared' | 'cached';
+    };
   }
 }
 
@@ -56,19 +59,13 @@ const getHeaders = () => {
   return {
     'Content-Type': 'application/json',
     'Accept': 'application/json'
-    // Add Authorization header here if needed in future
-    // 'Authorization': `Bearer ${token}` 
   };
 };
 
-/**
- * Standardized response handler.
- * Tries to parse JSON, handles HTTP errors, and normalizes the output.
- */
 const handleResponse = async <T>(response: Response): Promise<T> => {
   let data: any = {};
-  
   const contentType = response.headers.get("content-type");
+  
   if (contentType && contentType.includes("application/json")) {
     try {
       data = await response.json();
@@ -78,25 +75,35 @@ const handleResponse = async <T>(response: Response): Promise<T> => {
   }
 
   if (!response.ok) {
-    // Construct a meaningful error message
     const errorMessage = data.message || data.error || response.statusText || `Request failed with status ${response.status}`;
-    
-    // You could throw a custom error object here if you wanted specific error codes
     throw new Error(errorMessage);
   }
 
-  // Ensure the structure matches BackendResponse even if the backend returns something slightly different
-  // This acts as a localized adapter/interceptor
-  if (data && typeof data === 'object') {
-     return data as T;
+  // If the backend doesn't wrap in {data: ...}, we handle it
+  if (data && typeof data === 'object' && !('data' in data)) {
+    return { success: true, message: "OK", data: data } as unknown as T;
   }
 
-  // Fallback for empty success responses
-  return { success: true, message: "Success", data: {} } as unknown as T;
+  return data as T;
 };
 
 // --- API CLIENT METHODS ---
 
+/**
+ * GET /video/info?url=YOUTUBE_URL
+ */
+export const getVideoInfo = async (baseUrl: string, url: string): Promise<BackendResponse<VideoInfo>> => {
+  const cleanUrl = baseUrl.replace(/\/$/, '');
+  const response = await fetch(`${cleanUrl}/video/info?url=${encodeURIComponent(url)}`, {
+    method: 'GET',
+    headers: getHeaders()
+  });
+  return handleResponse<BackendResponse<VideoInfo>>(response);
+};
+
+/**
+ * POST /v2/projects
+ */
 export const createProject = async (
   baseUrl: string, 
   youtubeUrl: string, 
@@ -111,7 +118,7 @@ export const createProject = async (
     body: JSON.stringify({
       title,
       youtubeUrl,
-      userId: 1, // Hardcoded for MVP
+      userId: 1,
       quality,
       downloader 
     })
@@ -119,13 +126,14 @@ export const createProject = async (
   return handleResponse<CreateProjectResponse>(response);
 };
 
+/**
+ * GET /health
+ */
 export const testBackendConnection = async (baseUrl: string): Promise<{ success: boolean; message: string }> => {
   try {
     const cleanUrl = baseUrl.replace(/\/$/, '');
-    
-    // Try health endpoint first
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 5000); // 5s timeout
+    const timeoutId = setTimeout(() => controller.abort(), 5000);
 
     const response = await fetch(`${cleanUrl}/health`, { 
         method: 'GET',
@@ -136,26 +144,17 @@ export const testBackendConnection = async (baseUrl: string): Promise<{ success:
     clearTimeout(timeoutId);
 
     if (response && response.ok) {
-        return { success: true, message: "Connected (Health Check)" };
+        return { success: true, message: "Pocat.io API is Online 💚" };
     }
-
-    // Try root as fallback
-    const rootRes = await fetch(`${cleanUrl}/`, { method: 'GET' }).catch(() => null);
-    if (rootRes && rootRes.ok) {
-        return { success: true, message: "Connected (Root)" };
-    }
-
-    throw new Error("Server reachable but returned error");
+    throw new Error("Server reachable but Health Check failed.");
   } catch (error) {
-    const msg = error instanceof Error ? error.message : "Unknown connection error";
-    // Check specifically for AbortError (timeout) or mixed content issues
-    if (msg.includes('aborted')) return { success: false, message: "Connection Timed Out" };
-    if (msg.includes('Failed to fetch')) return { success: false, message: "Network Error (CORS or Offline)" };
-    
-    return { success: false, message: msg };
+    return { success: false, message: error instanceof Error ? error.message : "Connection failed" };
   }
 };
 
+/**
+ * GET /v2/projects/:id/download-status
+ */
 export const getProjectDownloadStatus = async (baseUrl: string, projectId: number): Promise<ProjectStatusResponse> => {
   const cleanUrl = baseUrl.replace(/\/$/, '');
   const response = await fetch(`${cleanUrl}/v2/projects/${projectId}/download-status`, {
@@ -165,6 +164,9 @@ export const getProjectDownloadStatus = async (baseUrl: string, projectId: numbe
   return handleResponse<ProjectStatusResponse>(response);
 };
 
+/**
+ * POST /v2/projects/:id/batch-clips
+ */
 export const batchProcessClips = async (baseUrl: string, projectId: number, clips: any[]): Promise<ClipProcessingResponse> => {
   const cleanUrl = baseUrl.replace(/\/$/, '');
   const response = await fetch(`${cleanUrl}/v2/projects/${projectId}/batch-clips`, {
@@ -175,6 +177,9 @@ export const batchProcessClips = async (baseUrl: string, projectId: number, clip
   return handleResponse<ClipProcessingResponse>(response);
 };
 
+/**
+ * POST /clips/render (Demo Mode)
+ */
 export const renderClip = async (baseUrl: string, payload: any): Promise<RenderClipResponse> => {
   const cleanUrl = baseUrl.replace(/\/$/, '');
   const response = await fetch(`${cleanUrl}/clips/render`, {
@@ -185,6 +190,9 @@ export const renderClip = async (baseUrl: string, payload: any): Promise<RenderC
   return handleResponse<RenderClipResponse>(response);
 };
 
+/**
+ * GET /clips/status/:clipId (Demo Mode)
+ */
 export const checkClipStatus = async (baseUrl: string, clipId: string): Promise<ClipStatusResponse> => {
   const cleanUrl = baseUrl.replace(/\/$/, '');
   const response = await fetch(`${cleanUrl}/clips/status/${clipId}`, {
