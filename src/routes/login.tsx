@@ -1,6 +1,7 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useState, useEffect } from 'react'
 import { useAuth } from '../contexts/AuthContext'
+import { Button } from '../components/ui'
 
 export const Route = createFileRoute('/login')({
   component: LoginPage,
@@ -16,9 +17,7 @@ function LoginPage() {
   const navigate = useNavigate()
 
   useEffect(() => {
-    if (isAuthenticated) {
-      navigate({ to: '/dashboard' })
-    }
+    if (isAuthenticated) navigate({ to: '/dashboard' })
   }, [isAuthenticated, navigate])
 
   if (isAuthenticated) return null
@@ -28,32 +27,22 @@ function LoginPage() {
     setError('')
     setIsLoading(true)
     const success = await login(username, password)
-    if (success) {
-      navigate({ to: '/dashboard' })
-    } else {
-      setError('Invalid username or password')
-    }
+    if (success) navigate({ to: '/dashboard' })
+    else setError('Invalid username or password')
     setIsLoading(false)
   }
 
   return (
     <div className="login-page">
       <div className="login-card">
-        {/* Logo */}
         <div className="login-header">
-          <div className="login-logo">
-            <i className="fa-solid fa-play" aria-hidden="true" />
-          </div>
+          <div className="login-logo"><i className="fa-solid fa-play" /></div>
           <h1 className="login-title">Welcome back</h1>
           <p className="login-subtitle">Sign in to your account</p>
         </div>
 
         <form onSubmit={handleSubmit} className="login-form">
-          {error && (
-            <div className="login-error">
-              {error}
-            </div>
-          )}
+          {error && <div className="login-error">{error}</div>}
 
           <div className="form-group">
             <label htmlFor="username" className="form-label">Username</label>
@@ -82,26 +71,13 @@ function LoginPage() {
                 required
                 autoComplete="current-password"
               />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="input-toggle"
-              >
-                <i className={`fa-solid ${showPassword ? 'fa-eye-slash' : 'fa-eye'}`} aria-hidden="true" />
+              <button type="button" onClick={() => setShowPassword(!showPassword)} className="input-toggle">
+                <i className={`fa-solid ${showPassword ? 'fa-eye-slash' : 'fa-eye'}`} />
               </button>
             </div>
           </div>
 
-          <button type="submit" disabled={isLoading} className="login-button">
-            {isLoading ? (
-              <>
-                <i className="fa-solid fa-spinner animate-spin" aria-hidden="true" />
-                Signing in...
-              </>
-            ) : (
-              'Sign In'
-            )}
-          </button>
+          <Button type="submit" loading={isLoading} className="login-button">Sign In</Button>
         </form>
 
         <p className="login-demo">Demo: sandikodev / password</p>

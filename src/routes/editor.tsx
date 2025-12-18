@@ -2,6 +2,7 @@ import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { DashboardLayout } from '../layouts/DashboardLayout'
 import { useAuth } from '../contexts/AuthContext'
 import { useState, useEffect } from 'react'
+import { Button, IconButton, Badge, Input, Select } from '../components/ui'
 
 export const Route = createFileRoute('/editor')({
   component: EditorPage,
@@ -15,6 +16,9 @@ const mockClips = [
   { id: 5, title: 'Funny Moment #2', score: 92 },
 ]
 
+const fontOptions = [{ value: 'ai', label: 'AI' }, { value: 'inter', label: 'Inter' }, { value: 'roboto', label: 'Roboto' }]
+const weightOptions = [{ value: 'regular', label: 'Regular' }, { value: 'bold', label: 'Bold' }]
+
 function EditorPage() {
   const { isAuthenticated, isLoading } = useAuth()
   const navigate = useNavigate()
@@ -22,23 +26,15 @@ function EditorPage() {
   const [activeClip, setActiveClip] = useState(1)
 
   useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
-      navigate({ to: '/login' })
-    }
+    if (!isLoading && !isAuthenticated) navigate({ to: '/login' })
   }, [isAuthenticated, isLoading, navigate])
 
-  if (isLoading || !isAuthenticated) {
-    return (
-      <div className="loading-screen">
-        <div className="loading-spinner" />
-      </div>
-    )
-  }
+  if (isLoading || !isAuthenticated) return <div className="loading-screen"><div className="loading-spinner" /></div>
 
   return (
     <DashboardLayout>
       <div className="editor-container">
-        {/* Top Toolbar */}
+        {/* Toolbar */}
         <div className="editor-toolbar">
           <input
             type="text"
@@ -47,114 +43,78 @@ function EditorPage() {
             placeholder="Paste YouTube URL here..."
             className="editor-url-input"
           />
-          <button className="editor-analyze-btn">
-            <i className="fa-solid fa-wand-magic-sparkles" />
+          <Button variant="primary" leftIcon={<i className="fa-solid fa-wand-magic-sparkles" />} className="editor-analyze-btn">
             Analyze with AI
-          </button>
+          </Button>
         </div>
 
-        {/* Main Editor Area */}
+        {/* Main */}
         <div className="editor-main">
-          {/* Left Panel - AI Clips */}
+          {/* Left - Clips */}
           <div className="editor-panel-left">
             <div className="editor-panel-header">
               <span>AI CLIPS</span>
-              <button className="editor-panel-btn">
-                <i className="fa-solid fa-ellipsis" />
-              </button>
+              <IconButton icon={<i className="fa-solid fa-ellipsis" />} size="sm" />
             </div>
             <div className="editor-clips-list">
               {mockClips.map((clip) => (
-                <div
-                  key={clip.id}
-                  onClick={() => setActiveClip(clip.id)}
-                  className={`editor-clip-item ${activeClip === clip.id ? 'active' : ''}`}
-                >
-                  <div className="editor-clip-thumb">
-                    <i className="fa-solid fa-image" />
-                  </div>
+                <div key={clip.id} onClick={() => setActiveClip(clip.id)} className={`editor-clip-item ${activeClip === clip.id ? 'active' : ''}`}>
+                  <div className="editor-clip-thumb"><i className="fa-solid fa-image" /></div>
                   <div className="editor-clip-info">
                     <div className="editor-clip-title">{clip.title}</div>
-                    <span className="editor-clip-score">{clip.score} Viral Score</span>
+                    <Badge variant="viral" className="editor-clip-score">{clip.score} Viral Score</Badge>
                   </div>
                 </div>
               ))}
             </div>
           </div>
 
-          {/* Center - Video Preview */}
+          {/* Center - Preview */}
           <div className="editor-panel-center">
             <div className="editor-video-wrapper">
               <div className="editor-video-player">
-                <div className="editor-video-play">
-                  <i className="fa-solid fa-play" />
-                </div>
+                <div className="editor-video-play"><i className="fa-solid fa-play" /></div>
               </div>
             </div>
             <div className="editor-video-controls">
-              <button className="editor-control-btn"><i className="fa-solid fa-play" /></button>
-              <button className="editor-control-btn"><i className="fa-solid fa-backward-step" /></button>
+              <IconButton icon={<i className="fa-solid fa-play" />} />
+              <IconButton icon={<i className="fa-solid fa-backward-step" />} />
               <span className="editor-time">0:00:00</span>
-              <div className="editor-progress">
-                <div className="editor-progress-fill" style={{ width: '0%' }} />
-              </div>
+              <div className="editor-progress"><div className="editor-progress-fill" style={{ width: '0%' }} /></div>
               <span className="editor-time">0:12:30</span>
-              <button className="editor-control-btn"><i className="fa-solid fa-forward-step" /></button>
-              <button className="editor-control-btn"><i className="fa-solid fa-expand" /></button>
+              <IconButton icon={<i className="fa-solid fa-forward-step" />} />
+              <IconButton icon={<i className="fa-solid fa-expand" />} />
             </div>
           </div>
 
-          {/* Right Panel - Properties */}
+          {/* Right - Properties */}
           <div className="editor-panel-right">
-            <div className="editor-panel-header">
-              <span>PROPERTIES</span>
-            </div>
+            <div className="editor-panel-header"><span>PROPERTIES</span></div>
             <div className="editor-properties">
               <div className="editor-prop-group">
                 <label className="editor-prop-label">Caption Editing</label>
                 <input type="text" className="editor-prop-input" placeholder="Highlight #1 was text" />
                 <textarea className="editor-prop-textarea" placeholder="That I wish you for your captions." rows={3} />
               </div>
-
               <div className="editor-prop-group">
                 <label className="editor-prop-label">Font Selection</label>
                 <div className="editor-prop-row">
-                  <select className="editor-prop-select">
-                    <option>AI</option>
-                    <option>Inter</option>
-                    <option>Roboto</option>
-                  </select>
-                  <select className="editor-prop-select">
-                    <option>Regular</option>
-                    <option>Bold</option>
-                  </select>
+                  <Select options={fontOptions} className="editor-prop-select" />
+                  <Select options={weightOptions} className="editor-prop-select" />
                 </div>
                 <div className="editor-prop-row">
-                  <div className="editor-color-picker">
-                    <span>Color</span>
-                    <div className="editor-color-box" style={{ backgroundColor: '#ffffff' }} />
-                  </div>
-                  <div className="editor-color-picker">
-                    <span>Stroke</span>
-                    <div className="editor-color-box" style={{ backgroundColor: '#000000' }} />
-                  </div>
+                  <div className="editor-color-picker"><span>Color</span><div className="editor-color-box" style={{ backgroundColor: '#fff' }} /></div>
+                  <div className="editor-color-picker"><span>Stroke</span><div className="editor-color-box" style={{ backgroundColor: '#000' }} /></div>
                 </div>
               </div>
-
-              <button className="editor-export-btn">
-                <i className="fa-solid fa-download" />
-                Export
-              </button>
+              <Button variant="primary" leftIcon={<i className="fa-solid fa-download" />} className="editor-export-btn">Export</Button>
             </div>
           </div>
         </div>
 
-        {/* Bottom - Timeline */}
+        {/* Timeline */}
         <div className="editor-timeline">
-          <div className="editor-timeline-header">
-            <span>0:11:16</span>
-            <span>0:1:28:31:22</span>
-          </div>
+          <div className="editor-timeline-header"><span>0:11:16</span><span>0:1:28:31:22</span></div>
           <div className="editor-timeline-track">
             <div className="editor-timeline-waveform" />
             <div className="editor-timeline-segments">
@@ -164,10 +124,7 @@ function EditorPage() {
             </div>
             <div className="editor-timeline-playhead" style={{ left: '30%' }} />
           </div>
-          <div className="editor-timeline-footer">
-            <span>1:21:4:25</span>
-            <span>12:12:33</span>
-          </div>
+          <div className="editor-timeline-footer"><span>1:21:4:25</span><span>12:12:33</span></div>
         </div>
       </div>
     </DashboardLayout>
