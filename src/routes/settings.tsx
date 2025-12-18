@@ -40,30 +40,39 @@ function SettingsComponent() {
       const response = await fetch(healthUrl, {
         method: 'GET',
         headers: {
-          'Content-Type': 'application/json',
+          'Accept': 'application/json',
         },
-        // Add timeout
-        signal: AbortSignal.timeout(10000), // 10 second timeout
+        signal: AbortSignal.timeout(10000),
       })
 
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}: ${response.statusText}`)
       }
 
-      const healthData = await response.json()
+      const contentType = response.headers.get('content-type') || ''
       
-      // Check if health response has expected structure
-      if (healthData && (healthData.status === 'ok' || healthData.healthy === true)) {
-        setConnectionStatus({ 
-          success: true, 
-          message: `✅ Connected successfully! Server: ${healthData.version || 'Unknown'} | Status: ${healthData.status || 'Healthy'}` 
-        })
+      if (contentType.includes('application/json')) {
+        const data = await response.json()
+        
+        // Handle Pocat API format: {success, message, data}
+        if (data.success === true) {
+          const version = data.data?.version || 'Unknown'
+          const uptime = data.data?.uptime || 'Unknown'
+          setConnectionStatus({ 
+            success: true, 
+            message: `✅ ${data.message} | Version: ${version} | Uptime: ${uptime}` 
+          })
+        } else {
+          setConnectionStatus({ 
+            success: false, 
+            message: `⚠️ API responded but reported failure: ${data.message || 'Unknown error'}` 
+          })
+        }
       } else {
-        setConnectionStatus({ 
-          success: false, 
-          message: `⚠️ Server responded but health check failed: ${JSON.stringify(healthData)}` 
-        })
+        const text = await response.text()
+        throw new Error(`Server returned non-JSON response (${contentType}). Got: ${text.substring(0, 100)}...`)
       }
+      
     } catch (error) {
       console.error('Connection test failed:', error)
       

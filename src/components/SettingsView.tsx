@@ -128,7 +128,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
               </div>
             )}
             <p className="settings-hint">
-              Test connection to verify backend API is accessible. The health endpoint will be checked at: <code>{backendUrl.replace(/\/$/, '')}/health</code>
+              Test connection to verify backend API is accessible. Will check: <code>{backendUrl.replace(/\/$/, '')}/health</code>
             </p>
           </Section>
 
