@@ -18,20 +18,11 @@ const fontOptions = [{ value: 'ai', label: 'AI' }, { value: 'inter', label: 'Int
 const weightOptions = [{ value: 'regular', label: 'Regular' }, { value: 'bold', label: 'Bold' }]
 
 function EditorPage() {
-  const { isAuthenticated, isLoading } = useAuth()
-  const navigate = useNavigate()
   const [youtubeUrl, setYoutubeUrl] = useState('')
   const [activeClip, setActiveClip] = useState(1)
 
-  useEffect(() => {
-    if (!isLoading && !isAuthenticated) navigate({ to: '/login' })
-  }, [isAuthenticated, isLoading, navigate])
-
-  if (isLoading || !isAuthenticated) return <div className="loading-screen"><div className="loading-spinner" /></div>
-
   return (
-    <AppShell>
-      <div className="editor-container">
+    <div className="editor-container">
         {/* Toolbar */}
         <div className="editor-toolbar">
           <input
@@ -124,7 +115,6 @@ function EditorPage() {
           </div>
           <div className="editor-timeline-footer"><span>1:21:4:25</span><span>12:12:33</span></div>
         </div>
-      </div>
-    </AppShell>
+    </div>
   )
 }

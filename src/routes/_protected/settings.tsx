@@ -7,15 +7,6 @@ export const Route = createFileRoute('/_protected/settings')({
 })
 
 function SettingsComponent() {
-  const { isAuthenticated, isLoading: authLoading } = useAuth()
-  const navigate = useNavigate()
-
-  useEffect(() => {
-    if (!authLoading && !isAuthenticated) {
-      navigate({ to: '/login' })
-    }
-  }, [isAuthenticated, authLoading, navigate])
-
   const [backendUrl, setBackendUrl] = useState(() => 
     localStorage.getItem('backend_url') || 'http://localhost:3333'
   )
@@ -95,23 +86,13 @@ function SettingsComponent() {
     }
   }
 
-  if (authLoading || !isAuthenticated) {
-    return (
-      <div className="loading-screen">
-        <div className="loading-spinner" />
-      </div>
-    )
-  }
-
   return (
-    <AppShell>
-      <SettingsView
+    <SettingsView
         backendUrl={backendUrl}
         onBackendUrlChange={handleBackendUrlChange}
         connectionStatus={connectionStatus}
         isTestingConnection={isTestingConnection}
         onTestConnection={handleTestConnection}
       />
-    </AppShell>
   )
 }

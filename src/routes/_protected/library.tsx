@@ -8,17 +8,9 @@ export const Route = createFileRoute('/_protected/library')({
 })
 
 function LibraryComponent() {
-  const { isAuthenticated, isLoading: authLoading } = useAuth()
-  const navigate = useNavigate()
   const [projects, setProjects] = useState<Project[]>([])
   const [isLoadingProjects, setIsLoadingProjects] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
-
-  useEffect(() => {
-    if (!authLoading && !isAuthenticated) {
-      navigate({ to: '/login' })
-    }
-  }, [isAuthenticated, authLoading, navigate])
 
   const loadProjects = async () => {
     setIsLoadingProjects(true)
@@ -71,25 +63,15 @@ function LibraryComponent() {
   }
 
   useEffect(() => {
-    if (isAuthenticated) loadProjects()
-  }, [isAuthenticated])
-
-  if (authLoading || !isAuthenticated) {
-    return (
-      <div className="loading-screen">
-        <div className="loading-spinner" />
-      </div>
-    )
-  }
+    loadProjects()
+  }, [])
 
   return (
-    <AppShell>
-      <LibraryView
+    <LibraryView
         projects={projects}
         isLoadingProjects={isLoadingProjects}
         onRefresh={loadProjects}
         fileInputRef={fileInputRef}
       />
-    </AppShell>
   )
 }
