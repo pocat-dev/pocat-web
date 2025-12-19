@@ -35,6 +35,7 @@
 @import './styles/pages/settings.css';
 @import './styles/pages/signin.css';
 @import './styles/pages/editor.css';
+@import './styles/pages/editor-ref.css';
 
 /* Layouts */
 @import './styles/layouts/app-shell.css';
