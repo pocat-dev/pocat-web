@@ -26,6 +26,7 @@
 @import './styles/components/empty-state.css';
 @import './styles/components/splash.css';
 @import './styles/components/clips-panel.css';
+@import './styles/components/editor-enhanced.css';
 
 /* Pages */
 @import './styles/pages/landing.css';
