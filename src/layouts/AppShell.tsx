@@ -1,6 +1,7 @@
 import React from 'react'
 import { Link, useLocation, useNavigate } from '@tanstack/react-router'
 import { useAuth } from '@/contexts/AuthContext'
+import { AnimatedLogo } from '@/components/AnimatedLogo'
 
 interface AppShellProps {
   children: React.ReactNode
@@ -30,7 +31,7 @@ export const AppShell: React.FC<AppShellProps> = ({ children }) => {
         {/* Logo */}
         <div className="app-sidebar-header">
           <div className="app-logo">
-            <i className="fa-solid fa-play" aria-hidden="true" />
+            <AnimatedLogo />
           </div>
         </div>
 

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { AnimatedLogo } from './AnimatedLogo'
 
 interface SplashScreenProps {
   onComplete: () => void
@@ -26,7 +27,7 @@ export function SplashScreen({ onComplete }: SplashScreenProps) {
     <div className="splash-screen">
       <div className="splash-content">
         <div className="splash-logo">
-          <i className="fa-solid fa-play" />
+          <AnimatedLogo size="xl" />
         </div>
         <h1 className="splash-title">Pocat</h1>
         <p className="splash-subtitle">AI Video Clipper</p>

@@ -1,0 +1,57 @@
+/* ============================================
+   ANIMATED LOGO
+   ============================================ */
+
+.animated-logo {
+  cursor: pointer;
+  transition: transform var(--duration-200) var(--ease-out);
+}
+
+.animated-logo:hover {
+  transform: scale(1.1);
+}
+
+/* Size variants */
+.animated-logo--sm {
+  filter: drop-shadow(0 2px 4px rgba(139, 92, 246, 0.2));
+}
+
+.animated-logo--md {
+  filter: drop-shadow(0 4px 8px rgba(139, 92, 246, 0.3));
+}
+
+.animated-logo--lg {
+  filter: drop-shadow(0 8px 16px rgba(139, 92, 246, 0.4));
+}
+
+.animated-logo--xl {
+  filter: drop-shadow(0 12px 24px rgba(139, 92, 246, 0.5));
+}
+
+.logo-bg {
+  animation: logoRotate 8s linear infinite;
+  transform-origin: center;
+}
+
+.logo-play {
+  animation: logoFloat 2s ease-in-out infinite alternate;
+  transform-origin: center;
+}
+
+@keyframes logoRotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes logoFloat {
+  from {
+    transform: translateY(0px);
+  }
+  to {
+    transform: translateY(-1px);
+  }
+}

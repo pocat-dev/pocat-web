@@ -21,18 +21,10 @@
 }
 
 .splash-logo {
-  width: 4rem;
-  height: 4rem;
-  background: var(--gradient-violet);
-  border-radius: var(--radius-2xl);
   display: flex;
   align-items: center;
   justify-content: center;
   margin: 0 auto var(--space-6);
-  box-shadow: 0 20px 40px -10px rgba(139, 92, 246, 0.4);
-  color: white;
-  font-size: 1.5rem;
-  animation: pulse 2s infinite;
 }
 
 .splash-title {
