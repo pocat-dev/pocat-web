@@ -1,4 +1,4 @@
-import { useEditor } from '@/hooks/useEditor'
+import { useEditor } from '@/hooks/useEditor-lost'
 import { EditorToolbar } from './EditorToolbar'
 import { EditorWorkspace } from './EditorWorkspace'
 import { EditorTimeline } from './EditorTimeline'

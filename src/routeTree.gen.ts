@@ -15,6 +15,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as ProtectedSettingsRouteImport } from './routes/_protected/settings'
 import { Route as ProtectedOverviewRouteImport } from './routes/_protected/overview'
 import { Route as ProtectedLibraryRouteImport } from './routes/_protected/library'
+import { Route as ProtectedEditorLostRouteImport } from './routes/_protected/editor-lost'
 import { Route as ProtectedEditorRouteImport } from './routes/_protected/editor'
 
 const LoginRoute = LoginRouteImport.update({
@@ -46,6 +47,11 @@ const ProtectedLibraryRoute = ProtectedLibraryRouteImport.update({
   path: '/library',
   getParentRoute: () => ProtectedRouteRoute,
 } as any)
+const ProtectedEditorLostRoute = ProtectedEditorLostRouteImport.update({
+  id: '/editor-lost',
+  path: '/editor-lost',
+  getParentRoute: () => ProtectedRouteRoute,
+} as any)
 const ProtectedEditorRoute = ProtectedEditorRouteImport.update({
   id: '/editor',
   path: '/editor',
@@ -56,6 +62,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/editor': typeof ProtectedEditorRoute
+  '/editor-lost': typeof ProtectedEditorLostRoute
   '/library': typeof ProtectedLibraryRoute
   '/overview': typeof ProtectedOverviewRoute
   '/settings': typeof ProtectedSettingsRoute
@@ -64,6 +71,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/editor': typeof ProtectedEditorRoute
+  '/editor-lost': typeof ProtectedEditorLostRoute
   '/library': typeof ProtectedLibraryRoute
   '/overview': typeof ProtectedOverviewRoute
   '/settings': typeof ProtectedSettingsRoute
@@ -74,21 +82,37 @@ export interface FileRoutesById {
   '/_protected': typeof ProtectedRouteRouteWithChildren
   '/login': typeof LoginRoute
   '/_protected/editor': typeof ProtectedEditorRoute
+  '/_protected/editor-lost': typeof ProtectedEditorLostRoute
   '/_protected/library': typeof ProtectedLibraryRoute
   '/_protected/overview': typeof ProtectedOverviewRoute
   '/_protected/settings': typeof ProtectedSettingsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/login' | '/editor' | '/library' | '/overview' | '/settings'
+  fullPaths:
+    | '/'
+    | '/login'
+    | '/editor'
+    | '/editor-lost'
+    | '/library'
+    | '/overview'
+    | '/settings'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/login' | '/editor' | '/library' | '/overview' | '/settings'
+  to:
+    | '/'
+    | '/login'
+    | '/editor'
+    | '/editor-lost'
+    | '/library'
+    | '/overview'
+    | '/settings'
   id:
     | '__root__'
     | '/'
     | '/_protected'
     | '/login'
     | '/_protected/editor'
+    | '/_protected/editor-lost'
     | '/_protected/library'
     | '/_protected/overview'
     | '/_protected/settings'
@@ -144,6 +168,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProtectedLibraryRouteImport
       parentRoute: typeof ProtectedRouteRoute
     }
+    '/_protected/editor-lost': {
+      id: '/_protected/editor-lost'
+      path: '/editor-lost'
+      fullPath: '/editor-lost'
+      preLoaderRoute: typeof ProtectedEditorLostRouteImport
+      parentRoute: typeof ProtectedRouteRoute
+    }
     '/_protected/editor': {
       id: '/_protected/editor'
       path: '/editor'
@@ -156,6 +187,7 @@ declare module '@tanstack/react-router' {
 
 interface ProtectedRouteRouteChildren {
   ProtectedEditorRoute: typeof ProtectedEditorRoute
+  ProtectedEditorLostRoute: typeof ProtectedEditorLostRoute
   ProtectedLibraryRoute: typeof ProtectedLibraryRoute
   ProtectedOverviewRoute: typeof ProtectedOverviewRoute
   ProtectedSettingsRoute: typeof ProtectedSettingsRoute
@@ -163,6 +195,7 @@ interface ProtectedRouteRouteChildren {
 
 const ProtectedRouteRouteChildren: ProtectedRouteRouteChildren = {
   ProtectedEditorRoute: ProtectedEditorRoute,
+  ProtectedEditorLostRoute: ProtectedEditorLostRoute,
   ProtectedLibraryRoute: ProtectedLibraryRoute,
   ProtectedOverviewRoute: ProtectedOverviewRoute,
   ProtectedSettingsRoute: ProtectedSettingsRoute,

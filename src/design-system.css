@@ -25,8 +25,6 @@
 @import './styles/components/media-card.css';
 @import './styles/components/empty-state.css';
 @import './styles/components/splash.css';
-@import './styles/components/clips-panel.css';
-@import './styles/components/editor-enhanced.css';
 
 /* Pages */
 @import './styles/pages/landing.css';
@@ -35,7 +33,6 @@
 @import './styles/pages/settings.css';
 @import './styles/pages/signin.css';
 @import './styles/pages/editor.css';
-@import './styles/pages/editor-ref.css';
 
 /* Layouts */
 @import './styles/layouts/app-shell.css';
