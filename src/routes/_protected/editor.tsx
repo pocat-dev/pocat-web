@@ -4,7 +4,7 @@ import { useAuth } from '../contexts/AuthContext'
 import { useState, useEffect } from 'react'
 import { Button, IconButton, Badge, Input, Select } from '../components/ui'
 
-export const Route = createFileRoute('/editor')({
+export const Route = createFileRoute('/_protected/editor')({
   component: EditorPage,
 })
 

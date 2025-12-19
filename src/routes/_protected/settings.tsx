@@ -4,7 +4,7 @@ import { AppShell } from '../layouts/AppShell'
 import { useAuth } from '../contexts/AuthContext'
 import { useState, useEffect } from 'react'
 
-export const Route = createFileRoute('/settings')({
+export const Route = createFileRoute('/_protected/settings')({
   component: SettingsComponent,
 })
 

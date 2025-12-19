@@ -5,7 +5,7 @@ import { useAuth } from '../contexts/AuthContext'
 import { useState, useRef, useEffect } from 'react'
 import { Project } from '../services/backend'
 
-export const Route = createFileRoute('/library')({
+export const Route = createFileRoute('/_protected/library')({
   component: LibraryComponent,
 })
 

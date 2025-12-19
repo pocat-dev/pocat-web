@@ -1,7 +1,6 @@
-import { createFileRoute, useNavigate, Link } from '@tanstack/react-router'
-import { useAuth } from '../contexts/AuthContext'
-import { AppShell } from '../layouts/AppShell'
-import { Badge, IconButton } from '../components/ui'
+import { createFileRoute, Link } from '@tanstack/react-router'
+import { useAuth } from '../../contexts/AuthContext'
+import { Badge, IconButton } from '../../components/ui'
 
 export const Route = createFileRoute('/overview')({
   component: OverviewPage,
@@ -25,15 +24,10 @@ const projects = [
 const statusVariant = { draft: 'neutral', processing: 'processing', published: 'success' } as const
 
 function OverviewPage() {
-  const { user, isAuthenticated, isLoading } = useAuth()
-  const navigate = useNavigate()
-
-  if (isLoading) return <div className="loading-screen"><div className="loading-spinner" /></div>
-  if (!isAuthenticated) { navigate({ to: '/login' }); return null }
+  const { user } = useAuth()
 
   return (
-    <AppShell>
-      <div className="app-content">
+    <div className="app-content">
         <h1 className="dashboard-title">Welcome, {user?.username}</h1>
 
         {/* Quick Actions */}
@@ -89,7 +83,6 @@ function OverviewPage() {
             ))}
           </div>
         </div>
-      </div>
-    </AppShell>
+    </div>
   )
 }
