@@ -80,7 +80,9 @@ export function useEditor(videoId?: string) {
     enabled: !!videoId,
     refetchInterval: (data) => {
       // Smart polling - only poll if there are active exports
-      const hasActiveExports = data?.some(job => 
+      if (!data || !Array.isArray(data)) return false
+      
+      const hasActiveExports = data.some(job => 
         job.status === 'processing' || job.status === 'queued'
       )
       return hasActiveExports ? 2000 : false
