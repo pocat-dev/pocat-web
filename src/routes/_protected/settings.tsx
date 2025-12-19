@@ -1,8 +1,6 @@
-import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { SettingsView } from '../components/SettingsView'
-import { AppShell } from '../layouts/AppShell'
-import { useAuth } from '../contexts/AuthContext'
-import { useState, useEffect } from 'react'
+import { createFileRoute } from '@tanstack/react-router'
+import { SettingsView } from '@/components/SettingsView'
+import { useState } from 'react'
 
 export const Route = createFileRoute('/_protected/settings')({
   component: SettingsComponent,

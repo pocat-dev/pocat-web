@@ -1,8 +1,6 @@
-import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { AppShell } from '../layouts/AppShell'
-import { useAuth } from '../contexts/AuthContext'
-import { useState, useEffect } from 'react'
-import { Button, IconButton, Badge, Input, Select } from '../components/ui'
+import { createFileRoute } from '@tanstack/react-router'
+import { useState } from 'react'
+import { Button, IconButton, Badge, Input, Select } from '@/components/ui'
 
 export const Route = createFileRoute('/_protected/editor')({
   component: EditorPage,

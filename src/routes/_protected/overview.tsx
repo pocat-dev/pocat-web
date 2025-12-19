@@ -1,8 +1,8 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
-import { useAuth } from '../../contexts/AuthContext'
-import { Badge, IconButton } from '../../components/ui'
+import { useAuth } from '@/contexts/AuthContext'
+import { Badge, IconButton } from '@/components/ui'
 
-export const Route = createFileRoute('/overview')({
+export const Route = createFileRoute('/_protected/overview')({
   component: OverviewPage,
 })
 

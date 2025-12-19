@@ -1,9 +1,7 @@
-import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { LibraryView } from '../components/LibraryView'
-import { AppShell } from '../layouts/AppShell'
-import { useAuth } from '../contexts/AuthContext'
+import { createFileRoute } from '@tanstack/react-router'
+import { LibraryView } from '@/components/LibraryView'
 import { useState, useRef, useEffect } from 'react'
-import { Project } from '../services/backend'
+import { Project } from '@/services/backend'
 
 export const Route = createFileRoute('/_protected/library')({
   component: LibraryComponent,

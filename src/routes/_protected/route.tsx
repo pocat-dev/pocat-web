@@ -1,5 +1,5 @@
 import { createFileRoute, Outlet, redirect } from '@tanstack/react-router'
-import { AppShell } from '../../layouts/AppShell'
+import { AppShell } from '@/layouts/AppShell'
 
 export const Route = createFileRoute('/_protected')({
   beforeLoad: ({ location }) => {

@@ -9,36 +9,21 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as SettingsRouteImport } from './routes/settings'
-import { Route as OverviewRouteImport } from './routes/overview'
 import { Route as LoginRouteImport } from './routes/login'
-import { Route as LibraryRouteImport } from './routes/library'
-import { Route as EditorRouteImport } from './routes/editor'
+import { Route as ProtectedRouteRouteImport } from './routes/_protected/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ProtectedSettingsRouteImport } from './routes/_protected/settings'
+import { Route as ProtectedOverviewRouteImport } from './routes/_protected/overview'
+import { Route as ProtectedLibraryRouteImport } from './routes/_protected/library'
+import { Route as ProtectedEditorRouteImport } from './routes/_protected/editor'
 
-const SettingsRoute = SettingsRouteImport.update({
-  id: '/settings',
-  path: '/settings',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const OverviewRoute = OverviewRouteImport.update({
-  id: '/overview',
-  path: '/overview',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
-const LibraryRoute = LibraryRouteImport.update({
-  id: '/library',
-  path: '/library',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const EditorRoute = EditorRouteImport.update({
-  id: '/editor',
-  path: '/editor',
+const ProtectedRouteRoute = ProtectedRouteRouteImport.update({
+  id: '/_protected',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -46,72 +31,77 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ProtectedSettingsRoute = ProtectedSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => ProtectedRouteRoute,
+} as any)
+const ProtectedOverviewRoute = ProtectedOverviewRouteImport.update({
+  id: '/overview',
+  path: '/overview',
+  getParentRoute: () => ProtectedRouteRoute,
+} as any)
+const ProtectedLibraryRoute = ProtectedLibraryRouteImport.update({
+  id: '/library',
+  path: '/library',
+  getParentRoute: () => ProtectedRouteRoute,
+} as any)
+const ProtectedEditorRoute = ProtectedEditorRouteImport.update({
+  id: '/editor',
+  path: '/editor',
+  getParentRoute: () => ProtectedRouteRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/editor': typeof EditorRoute
-  '/library': typeof LibraryRoute
   '/login': typeof LoginRoute
-  '/overview': typeof OverviewRoute
-  '/settings': typeof SettingsRoute
+  '/editor': typeof ProtectedEditorRoute
+  '/library': typeof ProtectedLibraryRoute
+  '/overview': typeof ProtectedOverviewRoute
+  '/settings': typeof ProtectedSettingsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/editor': typeof EditorRoute
-  '/library': typeof LibraryRoute
   '/login': typeof LoginRoute
-  '/overview': typeof OverviewRoute
-  '/settings': typeof SettingsRoute
+  '/editor': typeof ProtectedEditorRoute
+  '/library': typeof ProtectedLibraryRoute
+  '/overview': typeof ProtectedOverviewRoute
+  '/settings': typeof ProtectedSettingsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/editor': typeof EditorRoute
-  '/library': typeof LibraryRoute
+  '/_protected': typeof ProtectedRouteRouteWithChildren
   '/login': typeof LoginRoute
-  '/overview': typeof OverviewRoute
-  '/settings': typeof SettingsRoute
+  '/_protected/editor': typeof ProtectedEditorRoute
+  '/_protected/library': typeof ProtectedLibraryRoute
+  '/_protected/overview': typeof ProtectedOverviewRoute
+  '/_protected/settings': typeof ProtectedSettingsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/editor' | '/library' | '/login' | '/overview' | '/settings'
+  fullPaths: '/' | '/login' | '/editor' | '/library' | '/overview' | '/settings'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/editor' | '/library' | '/login' | '/overview' | '/settings'
+  to: '/' | '/login' | '/editor' | '/library' | '/overview' | '/settings'
   id:
     | '__root__'
     | '/'
-    | '/editor'
-    | '/library'
+    | '/_protected'
     | '/login'
-    | '/overview'
-    | '/settings'
+    | '/_protected/editor'
+    | '/_protected/library'
+    | '/_protected/overview'
+    | '/_protected/settings'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  EditorRoute: typeof EditorRoute
-  LibraryRoute: typeof LibraryRoute
+  ProtectedRouteRoute: typeof ProtectedRouteRouteWithChildren
   LoginRoute: typeof LoginRoute
-  OverviewRoute: typeof OverviewRoute
-  SettingsRoute: typeof SettingsRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/settings': {
-      id: '/settings'
-      path: '/settings'
-      fullPath: '/settings'
-      preLoaderRoute: typeof SettingsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/overview': {
-      id: '/overview'
-      path: '/overview'
-      fullPath: '/overview'
-      preLoaderRoute: typeof OverviewRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/login': {
       id: '/login'
       path: '/login'
@@ -119,18 +109,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/library': {
-      id: '/library'
-      path: '/library'
-      fullPath: '/library'
-      preLoaderRoute: typeof LibraryRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/editor': {
-      id: '/editor'
-      path: '/editor'
-      fullPath: '/editor'
-      preLoaderRoute: typeof EditorRouteImport
+    '/_protected': {
+      id: '/_protected'
+      path: ''
+      fullPath: ''
+      preLoaderRoute: typeof ProtectedRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -140,16 +123,59 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_protected/settings': {
+      id: '/_protected/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof ProtectedSettingsRouteImport
+      parentRoute: typeof ProtectedRouteRoute
+    }
+    '/_protected/overview': {
+      id: '/_protected/overview'
+      path: '/overview'
+      fullPath: '/overview'
+      preLoaderRoute: typeof ProtectedOverviewRouteImport
+      parentRoute: typeof ProtectedRouteRoute
+    }
+    '/_protected/library': {
+      id: '/_protected/library'
+      path: '/library'
+      fullPath: '/library'
+      preLoaderRoute: typeof ProtectedLibraryRouteImport
+      parentRoute: typeof ProtectedRouteRoute
+    }
+    '/_protected/editor': {
+      id: '/_protected/editor'
+      path: '/editor'
+      fullPath: '/editor'
+      preLoaderRoute: typeof ProtectedEditorRouteImport
+      parentRoute: typeof ProtectedRouteRoute
+    }
   }
 }
 
+interface ProtectedRouteRouteChildren {
+  ProtectedEditorRoute: typeof ProtectedEditorRoute
+  ProtectedLibraryRoute: typeof ProtectedLibraryRoute
+  ProtectedOverviewRoute: typeof ProtectedOverviewRoute
+  ProtectedSettingsRoute: typeof ProtectedSettingsRoute
+}
+
+const ProtectedRouteRouteChildren: ProtectedRouteRouteChildren = {
+  ProtectedEditorRoute: ProtectedEditorRoute,
+  ProtectedLibraryRoute: ProtectedLibraryRoute,
+  ProtectedOverviewRoute: ProtectedOverviewRoute,
+  ProtectedSettingsRoute: ProtectedSettingsRoute,
+}
+
+const ProtectedRouteRouteWithChildren = ProtectedRouteRoute._addFileChildren(
+  ProtectedRouteRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  EditorRoute: EditorRoute,
-  LibraryRoute: LibraryRoute,
+  ProtectedRouteRoute: ProtectedRouteRouteWithChildren,
   LoginRoute: LoginRoute,
-  OverviewRoute: OverviewRoute,
-  SettingsRoute: SettingsRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
