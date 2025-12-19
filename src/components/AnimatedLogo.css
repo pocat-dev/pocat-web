@@ -2,13 +2,31 @@
    ANIMATED LOGO
    ============================================ */
 
+.logo-container {
+  position: relative;
+  display: inline-block;
+}
+
 .animated-logo {
   cursor: pointer;
-  transition: transform var(--duration-200) var(--ease-out);
+  transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1) !important;
 }
 
 .animated-logo:hover {
-  transform: scale(1.1);
+  transform: scale(1.15) rotate(5deg) !important;
+  filter: brightness(1.2) saturate(1.3) !important;
+}
+
+.animated-logo:hover .gradient-start {
+  stop-color: #a855f7 !important;
+}
+
+.animated-logo:hover .gradient-end {
+  stop-color: #8b5cf6 !important;
+}
+
+.animated-logo.clicked {
+  animation: logoExplode 600ms cubic-bezier(0.68, -0.55, 0.265, 1.55) !important;
 }
 
 /* Size variants */
@@ -28,30 +46,139 @@
   filter: drop-shadow(0 12px 24px rgba(139, 92, 246, 0.5));
 }
 
-.logo-bg {
-  animation: logoRotate 8s linear infinite;
-  transform-origin: center;
+.animated-logo .logo-bg {
+  animation: logoRotate 4s linear infinite !important;
+  transform-origin: center !important;
+  transition: all 300ms ease !important;
 }
 
-.logo-play {
-  animation: logoFloat 2s ease-in-out infinite alternate;
-  transform-origin: center;
+.animated-logo:hover .logo-bg {
+  animation: logoRotateFast 1s linear infinite !important;
 }
 
+.animated-logo .logo-play {
+  animation: logoFloat 1.5s ease-in-out infinite alternate !important;
+  transform-origin: center !important;
+  transition: all 300ms ease !important;
+}
+
+.animated-logo:hover .logo-play {
+  animation: logoBounce 0.5s ease-in-out infinite alternate !important;
+}
+
+/* Easter Egg */
+.easter-egg {
+  position: absolute;
+  top: -60px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+  color: white;
+  padding: 12px 16px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 500;
+  white-space: nowrap;
+  box-shadow: 0 8px 20px rgba(139, 92, 246, 0.4);
+  animation: easterEggAppear 4s ease-out forwards;
+  z-index: 1000;
+  text-align: center;
+  min-width: 180px;
+}
+
+.easter-egg::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 6px solid transparent;
+  border-top-color: #7c3aed;
+}
+
+.easter-egg-text {
+  font-weight: 500;
+  margin-bottom: 2px;
+}
+
+.easter-egg-dev {
+  font-weight: 700;
+  font-size: 12px;
+  color: #fbbf24;
+  text-shadow: 0 0 8px rgba(251, 191, 36, 0.5);
+  margin-bottom: 4px;
+}
+
+.easter-egg-cta {
+  font-weight: 600;
+  font-size: 10px;
+  background: rgba(255, 255, 255, 0.2);
+  padding: 2px 6px;
+  border-radius: 8px;
+  margin-bottom: 4px;
+  animation: pulse 2s infinite;
+}
+
+.easter-egg-simple {
+  position: absolute;
+  top: -50px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #8b5cf6;
+  color: white;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 12px;
+  white-space: nowrap;
+  z-index: 9999;
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.5);
+}
+
+/* Keyframes */
 @keyframes logoRotate {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes logoRotateFast {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
 
 @keyframes logoFloat {
-  from {
-    transform: translateY(0px);
+  from { transform: translateY(0px); }
+  to { transform: translateY(-2px); }
+}
+
+@keyframes logoBounce {
+  from { transform: translateY(0px) scale(1); }
+  to { transform: translateY(-4px) scale(1.1); }
+}
+
+@keyframes logoExplode {
+  0% { transform: scale(1) rotate(0deg); }
+  50% { transform: scale(1.3) rotate(180deg); }
+  100% { transform: scale(1) rotate(360deg); }
+}
+
+@keyframes easterEggAppear {
+  0% {
+    opacity: 0;
+    transform: translateX(-50%) translateY(10px) scale(0.8);
   }
-  to {
-    transform: translateY(-1px);
+  15% {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0px) scale(1.05);
+  }
+  20% {
+    transform: translateX(-50%) translateY(0px) scale(1);
+  }
+  85% {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0px) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-10px) scale(0.9);
   }
 }
