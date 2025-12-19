@@ -1,53 +1,193 @@
 /* =================================
-   EDITOR PAGE
+   EDITOR PAGE - FIXED LAYOUT
    ================================= */
 
 .editor-container {
   display: flex;
   flex-direction: column;
-  height: 100%;
+  height: 100vh;
   background-color: var(--surface-base);
+  overflow: hidden;
 }
 
+/* Toolbar - Fixed height */
 .editor-toolbar {
+  height: 70px;
+  flex-shrink: 0;
   display: flex;
-  gap: 0.75rem;
-  padding: 0.75rem 1rem;
+  align-items: center;
+  gap: var(--space-3);
+  padding: 0 var(--space-4);
   background-color: var(--surface-primary);
   border-bottom: 1px solid var(--border-primary);
 }
 
-.editor-url-input {
+/* Main workspace - Flexible */
+.editor-main {
   flex: 1;
-  padding: 0.625rem 1rem;
-  font-size: 0.875rem;
-  color: var(--text-primary);
-  background-color: var(--surface-secondary);
-  border: 1px solid var(--border-primary);
-  border-radius: 0.5rem;
+  display: flex;
+  min-height: 0; /* Important for flex children */
 }
 
-.editor-url-input::placeholder {
-  color: var(--text-tertiary);
+/* Left panel - Fixed width */
+.editor-panel-left {
+  width: 280px;
+  flex-shrink: 0;
+  background: var(--surface-primary);
+  border-right: 1px solid var(--border-primary);
+  display: flex;
+  flex-direction: column;
 }
 
-.editor-url-input:focus {
-  outline: none;
-  border-color: #8b5cf6;
-  background-color: var(--surface-tertiary);
+/* Center panel - Flexible */
+.editor-panel-center {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background: var(--surface-primary);
+  min-width: 0; /* Important for flex children */
 }
 
-.editor-analyze-btn {
+/* Right panel - Fixed width */
+.editor-panel-right {
+  width: 320px;
+  flex-shrink: 0;
+  background: var(--surface-primary);
+  border-left: 1px solid var(--border-primary);
+  display: flex;
+  flex-direction: column;
+}
+
+/* Timeline - Fixed height */
+.editor-timeline {
+  height: 120px;
+  flex-shrink: 0;
+  background: var(--surface-secondary);
+  border-top: 1px solid var(--border-primary);
+  display: flex;
+  flex-direction: column;
+}
+
+/* Panel headers - Fixed height */
+.editor-panel-header {
+  height: 50px;
+  flex-shrink: 0;
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.625rem 1.25rem;
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: white;
-  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
-  border: none;
-  border-radius: 0.5rem;
+  justify-content: space-between;
+  padding: 0 var(--space-4);
+  background: var(--surface-secondary);
+  border-bottom: 1px solid var(--border-primary);
+  font-size: var(--text-sm);
+  font-weight: var(--font-semibold);
+  color: var(--text-primary);
+}
+
+/* Scrollable content areas */
+.editor-clips-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--space-2);
+}
+
+.editor-properties {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--space-4);
+}
+
+/* Video container - Proper aspect ratio */
+.editor-video-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: var(--space-4);
+  min-height: 0;
+}
+
+.editor-video-wrapper {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--surface-tertiary);
+  border-radius: var(--radius-lg);
+  margin-bottom: var(--space-3);
+  min-height: 300px;
+  position: relative;
+}
+
+/* Video controls - Fixed height */
+.editor-video-controls {
+  height: 60px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: 0 var(--space-3);
+  background: var(--surface-secondary);
+  border-radius: var(--radius-md);
+}
+
+/* Timeline components */
+.editor-timeline-header,
+.editor-timeline-footer {
+  height: 30px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 var(--space-4);
+  font-size: var(--text-xs);
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+}
+
+.editor-timeline-track {
+  flex: 1;
+  position: relative;
+  background: var(--surface-primary);
+  margin: 0 var(--space-4);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1400px) {
+  .editor-panel-left {
+    width: 260px;
+  }
+  
+  .editor-panel-right {
+    width: 300px;
+  }
+}
+
+@media (max-width: 1200px) {
+  .editor-panel-left {
+    width: 240px;
+  }
+  
+  .editor-panel-right {
+    width: 280px;
+  }
+}
+
+@media (max-width: 768px) {
+  .editor-main {
+    flex-direction: column;
+  }
+  
+  .editor-panel-left,
+  .editor-panel-right {
+    width: 100%;
+    height: 200px;
+  }
+  
+  .editor-timeline {
+    height: 100px;
+  }
+}
   cursor: pointer;
   white-space: nowrap;
 }
