@@ -1,5 +1,7 @@
 import { createFileRoute, Outlet, redirect } from '@tanstack/react-router'
 import { AppShell } from '@/layouts/AppShell'
+import { SplashScreen } from '@/components/SplashScreen'
+import { useState } from 'react'
 
 export const Route = createFileRoute('/_protected')({
   beforeLoad: ({ location }) => {
@@ -19,6 +21,12 @@ export const Route = createFileRoute('/_protected')({
 })
 
 function ProtectedLayoutComponent() {
+  const [showSplash, setShowSplash] = useState(true)
+
+  if (showSplash) {
+    return <SplashScreen onComplete={() => setShowSplash(false)} />
+  }
+
   return (
     <AppShell>
       <Outlet />

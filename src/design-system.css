@@ -24,6 +24,7 @@
 @import './styles/components/grid-layout.css';
 @import './styles/components/media-card.css';
 @import './styles/components/empty-state.css';
+@import './styles/components/splash.css';
 
 /* Pages */
 @import './styles/pages/landing.css';
