@@ -1,6 +1,6 @@
 import React from 'react'
-import { Link, useLocation } from '@tanstack/react-router'
-import { useAuth } from '../contexts/AuthContext'
+import { Link, useLocation, useNavigate } from '@tanstack/react-router'
+import { useAuth } from '@/contexts/AuthContext'
 
 interface AppShellProps {
   children: React.ReactNode
@@ -16,6 +16,12 @@ const navItems = [
 export const AppShell: React.FC<AppShellProps> = ({ children }) => {
   const { logout } = useAuth()
   const location = useLocation()
+  const navigate = useNavigate()
+
+  const handleLogout = () => {
+    logout()
+    navigate({ to: '/login' })
+  }
 
   return (
     <div className="app-layout">
@@ -44,7 +50,7 @@ export const AppShell: React.FC<AppShellProps> = ({ children }) => {
 
         {/* Footer */}
         <div className="app-sidebar-footer">
-          <button onClick={logout} className="app-nav-item" title="Logout">
+          <button onClick={handleLogout} className="app-nav-item" title="Logout">
             <i className="fa-solid fa-right-from-bracket" aria-hidden="true" />
           </button>
         </div>
